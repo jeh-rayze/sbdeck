@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stackbase Systems — Making legacy systems, AI-ready.</title>
+  <meta name="description"
+    content="Stackbase turns your existing enterprise applications into governed, verified, AI-callable capabilities with zero changes to legacy code.">
+  <meta property="og:title" content="Stackbase Systems — Making legacy systems, AI-ready.">
+  <meta name="theme-color" content="#05060A">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="dark-theme">
+
+  <!-- GLOBAL AMBIENT LAYERS -->
+  <div id="scroll-progress"></div>
+  <canvas id="aurora-canvas"></canvas>
+  <canvas id="spark-canvas"></canvas>
+  <div id="cursor-blob"></div>
+  <div id="cursor-dot"></div>
+  <div id="noise-overlay"></div>
+
+  <!-- ================================================================ NAVBAR ================================================================ -->
+  <header class="site-nav" id="siteNav">
+    <div class="container nav-inner">
+      <a href="#top" class="brand" aria-label="Stackbase Systems">
+        <img src="logo.png" alt="Stackbase Systems Logo" class="brand-logo">
+      </a>
+      <nav>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="#problem">Executive Summary</a></li>
+          <li><a href="#architecture">Architecture</a></li>
+          <li><a href="#signature">Live Gateway</a></li>
+          <li><a href="#what-you-get">What You Get</a></li>
+          <li><a href="#icp">Operations ICP</a></li>
+          <li><a href="#competitors">Competitors</a></li>
+          <li><a href="#team">Team</a></li>
+        </ul>
+      </nav>
+      <div class="nav-right">
+        <a href="mailto:jc@stackbases.ai" class="nav-cta" data-copy-email>
+          <span class="nav-cta-dot"></span>jc@stackbases.ai
+        </a>
+        <button class="nav-mob-toggle" id="navToggle" aria-label="Toggle Menu">MENU</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================================================================ HERO SECTION ================================================================ -->
+  <div id="top"></div>
+  <section class="hero" id="hero">
+    <canvas id="grid-canvas"></canvas>
+    <div class="hero-beams" aria-hidden="true">
+      <svg viewBox="0 0 900 600" preserveAspectRatio="none" fill="none">
+        <line class="beam" x1="900" y1="0" x2="350" y2="600" stroke="rgba(232,146,60,.4)" stroke-width="0.7" />
+        <line class="beam" x1="820" y1="0" x2="240" y2="600" stroke="rgba(232,146,60,.3)" stroke-width="0.5" />
+        <line class="beam" x1="740" y1="0" x2="160" y2="600" stroke="rgba(139,92,246,.3)" stroke-width="0.5" />
+        <line class="beam" x1="660" y1="0" x2="80" y2="600" stroke="rgba(232,146,60,.2)" stroke-width="0.4" />
+      </svg>
+    </div>
+
+    <div class="container hero-content">
+      <div class="hero-eyebrow" data-reveal>
+      </div>
+
+      <h1 class="hero-h1" id="heroH1" data-reveal data-reveal-delay="100">
+        <span class="h1-line1">Making legacy systems,</span>
+        <span class="h1-line2"><span class="h1-accent" id="h1Accent">AI-ready.</span></span>
+      </h1>
+
+      <p class="hero-sub" data-reveal data-reveal-delay="200">
+        Stackbase turns your existing enterprise applications into
+        <strong>governed, verified, AI-callable capabilities</strong> —
+        <span class="text-highlight">with zero changes to legacy code.</span>
+      </p>
+
+      <div class="hero-ctas" data-reveal data-reveal-delay="300">
+        <a href="mailto:jc@stackbases.ai" class="btn-primary mag-btn" data-copy-email>
+          <span class="btn-primary-inner">
+            Talk to us (jc@stackbases.ai)
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </span>
+        </a>
+        <a href="#signature" class="btn-secondary">
+          <span>See the gateway →</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 2v10M3 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- TERMINAL CONTROL PLANE WINDOW -->
+      <div class="hero-terminal spotlight-card" data-reveal data-reveal-delay="420">
+        <div class="term-chrome">
+          <div class="term-dots">
+            <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          </div>
+          <span class="term-title">stackbase — control plane v2.4</span>
+          <div class="term-status"><span class="term-status-dot"></span> ENFORCING GOVERNANCE</div>
+        </div>
+        <div class="term-body" id="termOutput"></div>
+      </div>
+
+      <!-- TICKER MARQUEE -->
+      <div class="ticker-wrap" data-reveal>
+        <div class="ticker-track" id="tickerTrack"></div>
+      </div>
+    </div><!-- /hero-content -->
+  </section>
+
+  <!-- ================================================================ SECTION 2: EXECUTIVE SUMMARY (BENTO GRID) ================================================================ -->
+  <section class="pillars-section" id="problem">
+    <div class="container">
+      <div class="section-head center" data-reveal>
+        <div class="eyebrow">Executive Summary</div>
+        <h2 class="wavy-h2">A Trillion Dollars of AI ROI, Stuck Behind Legacy.</h2>
+        <p>The systems that run trading, payments, and settlement were never built to be called by an AI agent.</p>
+      </div>
+
+      <div class="bento-grid" data-stagger>
+        <!-- BENTO 01 -->
+        <div class="bento-card spotlight-card">
+          <div>
+            <div class="bento-badge">01 · THE PROBLEM</div>
+            <h3>AI Can't Touch What Runs the Bank</h3>
+            <p>AI inside enterprises can't act on legacy systems — trading, settlements, payments — which runs their
+              daily operations.</p>
+          </div>
+          <div class="bento-stat-row">
+            <div class="stat-pill"><span class="stat-num">$1T+</span> AI ROI Blocked</div>
+            <div class="stat-pill"><span class="stat-num">95%</span> Pilots Never Reach P&L</div>
+          </div>
+        </div>
+
+        <!-- BENTO 02 -->
+        <div class="bento-card spotlight-card">
+          <div>
+            <div class="bento-badge">02 · THE PRODUCT</div>
+            <h3>The First Governed Legacy-to-AI Layer</h3>
+            <p>First AI platform to transform legacy systems into verified, AI-callable tools — with zero changes to
+              legacy code.</p>
+          </div>
+          <div class="bento-stat-row">
+            <div class="stat-pill"><span class="stat-num">REST + MCP</span> Gateways</div>
+            <div class="stat-pill"><span class="stat-num">100%</span> Approved & Audited</div>
+          </div>
+        </div>
+
+        <!-- BENTO 03 -->
+        <div class="bento-card spotlight-card">
+          <div>
+            <div class="bento-badge">03 · VALUE PROPOSITION</div>
+            <h3>No Rewrites. No Reverse Engineering.</h3>
+            <p>No need to rewrite & reverse engineer complex legacy. Connect AI to Stackbase with zero changes to
+              legacy.</p>
+          </div>
+          <div class="bento-stat-row">
+            <div class="stat-pill"><span class="stat-num">$500K–$1M</span> Entry ACV</div>
+            <div class="stat-pill"><span class="stat-num">$5M–$20M</span> Expansion</div>
+          </div>
+        </div>
+
+        <!-- BENTO 04 -->
+        <div class="bento-card spotlight-card col-span-3">
+          <div>
+            <div class="bento-badge">04 · THE GOAL</div>
+            <h3>The Standard Router for Enterprise AI</h3>
+            <p>Become the standard intelligent router in the enterprise — routing AI agents safely to critical
+              enterprise systems.</p>
+          </div>
+          <div class="bento-stat-row">
+            <div class="stat-pill"><span class="stat-num">Elite</span> Technical Team</div>
+            <div class="stat-pill"><span class="stat-num">2 Tier 1 Banks</span> in Final Contracts as Major Design
+              Partners</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ SECTION 3: SYSTEM ARCHITECTURE & FLOW DIAGRAM ================================================================ -->
+  <section id="architecture" class="section-glow">
+    <div class="container">
+      <div class="section-head center" data-reveal>
+        <div class="eyebrow">System Architecture</div>
+        <h2 class="wavy-h2">Introducing Stackbase: Make Your AI Do Real Work Safely.</h2>
+        <p>Compare un-governed connector failure against Stackbase's governed control plane.</p>
+      </div>
+
+      <!-- ARCHITECTURE DIAGRAM CONTAINER WITH IMAGE & INTERACTIVE HOTSPOTS -->
+      <div class="diagram-wrapper spotlight-card" data-reveal>
+        <div class="diagram-header">
+          <div class="diagram-title-group">
+            <div class="diagram-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M4 6h16M4 12h16M4 18h16" stroke="#E8923C" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </div>
+            <div>
+              <h3>Enterprise Integration Architecture Topology</h3>
+              <div class="diagram-sub">AI Co-Pilots & Agentic AI connecting to Internal Enterprise Systems</div>
+            </div>
+          </div>
+          <div class="diagram-badge">FIG 2.1 — ARCHITECTURE MATRIX</div>
+        </div>
+
+        <div class="diagram-image-container">
+          <img src="imageimage.jpeg"
+            alt="Stackbase Architecture Diagram showing AI Co-Pilots connecting to Native AI Capabilities vs Internal Enterprise Systems"
+            class="diagram-img">
+          <div class="diagram-overlay-glow"></div>
+
+          <!-- Hotspot Highlights for interactive UX -->
+          <div class="hotspot hs-1" data-tooltip="AI Co-Pilots & Agents (Claude, ChatGPT, Custom Agents)">
+            <div class="hotspot-pulse"></div>
+          </div>
+          <div class="hotspot hs-2" data-tooltip="Blocked Access: No Identity, No Audit Trail, No Connectivity">
+            <div class="hotspot-pulse danger"></div>
+          </div>
+          <div class="hotspot hs-3"
+            data-tooltip="Internal Enterprise Systems (Trading, Risk, Settlements, GL, Payments, Treasury)">
+            <div class="hotspot-pulse"></div>
+          </div>
+        </div>
+
+        <div class="diagram-footer-grid">
+          <div class="df-card danger">
+            <div class="df-head"><span>🚫</span> AI Cannot Interact with Internal Systems (Yikes !!!)</div>
+            <ul style="margin-top:8px; padding-left:18px; line-height:1.65;">
+              <li>NO UI Function available as API on Legacy Systems</li>
+              <li>Agent has NO Identity / Entitlements on UI</li>
+              <li>No audit trail / No Connectivity</li>
+            </ul>
+          </div>
+          <div class="df-card success">
+            <div class="df-head"><span>😊</span> Introducing Stackbase: Governed Control Plane (Awesome !!!)</div>
+            <ul style="margin-top:8px; padding-left:18px; line-height:1.65;">
+              <li>Governed Access: Identity · Entitlements · Audit Trail · Approvals</li>
+              <li>Identifies and fixes breaks across internal applications</li>
+              <li>Save 1000s of hours — move today's repetitive work safely to AI agents</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ SECTION 4: LIVE GATEWAY SIMULATOR & COMPARISON ================================================================ -->
+  <section id="signature" class="section-dark">
+    <div class="container">
+      <div class="section-head center" data-reveal>
+        <div class="eyebrow">Interactive Gateway Simulator</div>
+        <h2 class="wavy-h2">One Gateway. Every Call Identified, Approved, and Audited.</h2>
+        <p>Toggle the engine state below to experience how Stackbase empowers AI co-pilots in front of core systems.</p>
+      </div>
+
+      <!-- TOGGLE CONTROLS -->
+      <div class="gov-toggle-wrap" data-reveal>
+        <div class="gov-toggle-container">
+          <button id="btnWithout" class="toggle-btn">
+            <span class="tb-icon">✕</span> Without Stackbase (Blocked)
+          </button>
+          <button id="btnWith" class="toggle-btn active">
+            <span class="tb-icon">✓</span> With Stackbase (Governed)
+          </button>
+        </div>
+      </div>
+
+      <!-- DYNAMIC DEMO DISPLAY VIEWPORT -->
+      <div class="demo-viewport-card spotlight-card" data-reveal>
+        <div class="viewport-header">
+          <div class="vh-left">
+            <span class="vh-dot green" id="vhStatusDot"></span>
+            <span class="vh-title" id="vhTitle">WITH STACKBASE — GOVERNED EXECUTION ENGINE</span>
+          </div>
+          <div class="vh-right">
+            <span class="vh-badge" id="vhBadge">ACTIVE MCP GATEWAY</span>
+          </div>
+        </div>
+
+        <div class="iframe-wrapper">
+          <!-- WITH STACKBASE IFRAME -->
+          <iframe id="iframeWith" src="sbclaude.html" class="demo-iframe active" title="With Stackbase Demo"></iframe>
+          <!-- WITHOUT STACKBASE IFRAME -->
+          <iframe id="iframeWithout" src="sbclaude-without.html" class="demo-iframe"
+            title="Without Stackbase Demo"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ SECTION 5: WHAT YOU GET WITH STACKBASE ================================================================ -->
+  <section id="what-you-get" class="section-glow">
+    <div class="container">
+      <div class="section-head center" data-reveal>
+        <div class="eyebrow">What You Get</div>
+        <h2 class="wavy-h2">What You Get With Stackbase</h2>
+        <p>Reusable API/MCPs that combine across your IT landscape.</p>
+      </div>
+
+      <div class="get-grid" data-stagger>
+        <div class="get-card spotlight-card">
+          <div class="get-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M7 6v6a5 5 0 0 0 10 0V6" stroke="#E8923C" stroke-width="1.8" stroke-linecap="round"/><path d="M5 6h5M14 6h5M12 16v4" stroke="#E8923C" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <h3>AI Tools (APIs & MCP)</h3>
+          <p>Create Tools at scale across 1000s of your internal applications securely accessible.</p>
+        </div>
+
+        <div class="get-card spotlight-card">
+          <div class="get-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke="#E8923C" stroke-width="1.8"/><path d="M8 9h8M8 13h8M8 17h5" stroke="#E8923C" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <h3>DocSite for MCP docs</h3>
+          <p>DocSite explains the MCP tools, the Inputs, outputs, and failure modes.</p>
+        </div>
+
+        <div class="get-card spotlight-card">
+          <div class="get-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#E8923C" stroke-width="1.8"/><path d="M5 20c0-4 3.5-7 7-7s7 3 7 7" stroke="#E8923C" stroke-width="1.8"/><path d="M17 6l1.5 1.5L21 5" stroke="#E8923C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3>Stackbase App Buddy & CLI</h3>
+          <p>Capture the functionality & specifications of the tool.</p>
+        </div>
+
+        <div class="get-card spotlight-card">
+          <div class="get-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2l9 4v7c0 6-3.8 9.5-9 11-5.2-1.5-9-5-9-11V6l9-4z" stroke="#E8923C" stroke-width="1.8"/><path d="M9 12l2.5 2.5L16 9" stroke="#E8923C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3>Verification evidence</h3>
+          <p>Evidence it matches the real system.</p>
+        </div>
+
+        <div class="get-card spotlight-card">
+          <div class="get-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="8" width="18" height="12" rx="2" stroke="#E8923C" stroke-width="1.8"/><circle cx="8" cy="14" r="2" fill="#E8923C"/><path d="M13 14h5" stroke="#E8923C" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <h3>Stackbase Control Plane</h3>
+          <p>Control & Governance Gateway with identity, entitlements & observability.</p>
+        </div>
+
+        <div class="get-card spotlight-card">
+          <div class="get-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#E8923C" stroke-width="1.8"/><path d="M7 9h10M7 13h10M7 17h6" stroke="#E8923C" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <h3>Console & Runtime Audit Trail</h3>
+          <p>Every call, immutably logged. Available on the Stackbase Console.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ SECTION 6: WE LAND IN BACK OFFICE OPERATIONS (ICP) ================================================================ -->
+  <section id="icp" class="section-dark">
+    <div class="container">
+      <div class="section-head center" data-reveal>
+        <div class="eyebrow">Target ICP</div>
+        <h2 class="wavy-h2">We Land in Back Office Operations</h2>
+        <p>Hundreds of analysts. Fragmented legacy systems. Exceptions all day.</p>
+      </div>
+
+      <div class="icp-split-layout" data-reveal>
+        <!-- LEFT SIDE: WHERE THE WEIGHT SITS -->
+        <div class="icp-left-list">
+          <div
+            style="font-family:var(--font-mono); font-size:11px; color:var(--amber); letter-spacing:0.12em; margin-bottom:10px; font-weight:700;">
+            WHERE THE WEIGHT SITS</div>
+
+          <div class="icp-item-card entry-card">
+            <div>
+              <div class="icp-item-title">⇄ Back Office Ops</div>
+              <div class="icp-item-sub">settlements · recons · payments · fails</div>
+            </div>
+            <span class="icp-entry-badge">ENTRY</span>
+          </div>
+
+          <div class="icp-item-card">
+            <div>
+              <div class="icp-item-title">⚖️ Compliance Ops</div>
+              <div class="icp-item-sub">surveillance · AML/KYC · evidence</div>
+            </div>
+          </div>
+
+          <div class="icp-item-card">
+            <div>
+              <div class="icp-item-title">🏦 Finance & Treasury Ops</div>
+              <div class="icp-item-sub">liquidity · GL · reg reporting</div>
+            </div>
+          </div>
+
+          <div class="icp-item-card">
+            <div>
+              <div class="icp-item-title">📈 Risk Ops</div>
+              <div class="icp-item-sub">exposures · limit breaches</div>
+            </div>
+          </div>
+
+          <div class="icp-item-card">
+            <div>
+              <div class="icp-item-title">⚙️ Technology Ops</div>
+              <div class="icp-item-sub">change impact · incidents · lineage</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT SIDE: INITIAL ICP PANEL -->
+        <div class="icp-right-panel spotlight-card">
+          <div
+            style="font-family:var(--font-mono); font-size:11px; color:var(--amber-bright); letter-spacing:0.12em; margin-bottom:12px; font-weight:700;">
+            INITIAL ICP</div>
+          <h3 style="font-size:24px; margin-bottom:16px;">Operations · Tier 1 Banks</h3>
+
+          <div class="icp-tags-row">
+            <span class="icp-tag-pill">RECONCILIATIONS</span>
+            <span class="icp-tag-pill">SETTLEMENTS</span>
+            <span class="icp-tag-pill">PAYMENTS</span>
+          </div>
+
+          <div class="icp-stakeholders">
+            <div class="icp-stakeholder-item">👤 <strong>Buyer:</strong> COO / Head of Markets Ops</div>
+            <div class="icp-stakeholder-item">🛠️ <strong>Sponsor:</strong> CIO · CTO · Head of AI</div>
+          </div>
+
+          <div class="icp-stats-grid">
+            <div class="icp-stat-box">
+              <div class="icp-stat-val">100s</div>
+              <div class="icp-stat-lbl">ops analysts per bank</div>
+            </div>
+            <div class="icp-stat-box">
+              <div class="icp-stat-val">1,000s</div>
+              <div class="icp-stat-lbl">exceptions per day</div>
+            </div>
+            <div class="icp-stat-box">
+              <div class="icp-stat-val">6–10</div>
+              <div class="icp-stat-lbl">systems per investigation</div>
+            </div>
+          </div>
+
+          <div class="icp-entry-banner">
+            <div class="icp-entry-icon">✓</div>
+            <div>
+              <div class="icp-entry-title">ENTRY USE CASE — read-only settlement-break investigation</div>
+              <div class="icp-entry-desc">Agents fetch trade, settlement, payment, SSI and market-data evidence, propose
+                root cause — analysts approve.</div>
+            </div>
+          </div>
+
+          <div class="icp-footer-line">
+            NO WRITE ACCESS · LIVE IN WEEKS &nbsp;|&nbsp; EXPAND: breaks → recons → fails → payments → surveillance →
+            ops-wide
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ SECTION 7: ALTERNATIVES & COMPETITORS ================================================================ -->
+  <section id="competitors" class="section-glow">
+    <div class="container">
+      <div class="section-head center" data-reveal>
+        <div class="eyebrow">Competitive Landscape</div>
+        <h2 class="wavy-h2">Alternatives & Competitors</h2>
+        <p>Every other path costs 20 application dev teams their year.</p>
+      </div>
+
+      <div class="compare-matrix-grid" data-stagger>
+        <!-- COL 1: IN-HOUSE -->
+        <div class="compare-card standard spotlight-card">
+          <div>
+            <div class="compare-header-tag">IN-HOUSE / CONSULTANTS</div>
+            <div class="compare-title">Bespoke Builds</div>
+            <ul class="compare-features">
+              <li>20 app teams</li>
+              <li>20 bespoke builds</li>
+              <li><strong>NO governance</strong></li>
+            </ul>
+          </div>
+          <div class="compare-price-block">
+            <div class="compare-subtag">20 SYSTEMS, ILLUSTRATIVE</div>
+            <div class="compare-price">$5M+</div>
+            <div class="compare-price-sub">~$500K × 20 systems · 06–12 months</div>
+          </div>
+        </div>
+
+        <!-- COL 2: GLEAN -->
+        <div class="compare-card standard spotlight-card">
+          <div>
+            <div class="compare-header-tag">GLEAN & ENTERPRISE SEARCH</div>
+            <div class="compare-title">SaaS Search Only</div>
+            <ul class="compare-features">
+              <li>Search only</li>
+              <li>Limited SaaS Execution</li>
+              <li><strong>NO Legacy API Available</strong></li>
+            </ul>
+          </div>
+          <div class="compare-price-block">
+            <div class="compare-subtag">20 SYSTEMS, ILLUSTRATIVE</div>
+            <div class="compare-price">License + $10M+</div>
+            <div class="compare-price-sub">integration still on you</div>
+          </div>
+        </div>
+
+        <!-- COL 3: CLAUDE CODE / OPENAI -->
+        <div class="compare-card standard spotlight-card">
+          <div>
+            <div class="compare-header-tag">CLAUDE CODE / OPENAI</div>
+            <div class="compare-title">Raw Model APIs</div>
+            <ul class="compare-features">
+              <li>20 app teams</li>
+              <li>20 bespoke builds</li>
+              <li><strong>NO governance</strong></li>
+            </ul>
+          </div>
+          <div class="compare-price-block">
+            <div class="compare-subtag">20 SYSTEMS, ILLUSTRATIVE</div>
+            <div class="compare-price">$5M+</div>
+            <div class="compare-price-sub">~$500K × 20 systems · 06–12 months</div>
+          </div>
+        </div>
+
+        <!-- COL 4: STACKBASE (WINNER) -->
+        <div class="compare-card winner spotlight-card">
+          <div>
+            <div class="compare-header-tag">STACKBASE (WINNER)</div>
+            <div class="compare-title">Verified execution layer</div>
+            <ul class="compare-features">
+              <li>Verified MCPs created in days/weeks</li>
+              <li>Compliant & Secure access for Agents</li>
+              <li><strong>Full Identity, Entitlements & Audit</strong></li>
+            </ul>
+          </div>
+          <div class="compare-price-block">
+            <div class="compare-subtag">20 SYSTEMS, ILLUSTRATIVE</div>
+            <div class="compare-price">$500K–$1M</div>
+            <div class="compare-price-sub">entry ACV · live in weeks</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="compare-footer-note" data-reveal>
+        Same outcome: <strong>$10M+ and two years</strong> — or one governed layer, <strong>live in weeks.</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ SECTION 8: GOVERNANCE ================================================================ -->
+  <section id="governance" class="section-dark">
+    <div class="container">
+      <div class="section-head center" data-reveal>
+        <div class="eyebrow">Governance & Security</div>
+        <h2 class="wavy-h2">Fail-Closed by Design. A Gate in Front of Everything.</h2>
+        <p>Built for regulated industries — banking, capital markets, insurance — where every access decision must be
+          defensible.</p>
+      </div>
+
+      <div class="bento-grid-4" data-stagger>
+        <div class="glass-card gov-card spotlight-card">
+          <div class="gov-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="8" r="4" stroke="#E8923C" stroke-width="1.8" />
+              <path d="M5 20c0-4 3.5-7 7-7s7 3 7 7" stroke="#E8923C" stroke-width="1.8" />
+            </svg>
+          </div>
+          <h3>Identity</h3>
+          <p>Each caller maps to a target account via your SSO — no shared logins, no anonymous access, no open-ended
+            credentials.</p>
+        </div>
+
+        <div class="glass-card gov-card spotlight-card">
+          <div class="gov-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <rect x="5" y="11" width="14" height="10" rx="2" stroke="#E8923C" stroke-width="1.8" />
+              <path d="M8 11V7a4 4 0 1 1 8 0v4" stroke="#E8923C" stroke-width="1.8" />
+            </svg>
+          </div>
+          <h3>Entitlements</h3>
+          <p>Roles decide exactly which systems and operations a caller may reach. Agent permissions mirror your
+            existing RBAC.</p>
+        </div>
+
+        <div class="glass-card gov-card spotlight-card">
+          <div class="gov-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2l8 4v6c0 5-3.5 9.5-8 11-4.5-1.5-8-6-8-11V6l8-4z" stroke="#E8923C" stroke-width="1.8" />
+            </svg>
+          </div>
+          <h3>Vaulted</h3>
+          <p>Secrets stay in the vault. Sessions open just-in-time and fail closed if unmapped — no mapping, no call.
+          </p>
+        </div>
+
+        <div class="glass-card gov-card spotlight-card">
+          <div class="gov-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <rect x="4" y="4" width="16" height="16" rx="2" stroke="#E8923C" stroke-width="1.8" />
+              <path d="M8 9h8M8 13h8M8 17h5" stroke="#E8923C" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+          </div>
+          <h3>Audited</h3>
+          <p>Every call logged with an immutable trail — inputs, outputs, policy decisions, and lineage. Evidence, not
+            assurances.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ SECTION 9: ECONOMICS & ROI ================================================================ -->
+  <section id="economics" class="section-glow">
+    <div class="container">
+      <div class="section-head center" data-reveal>
+        <div class="eyebrow">Institutional ROI</div>
+        <h2 class="wavy-h2">One Agent. The Output of an Entire Team.</h2>
+        <p>Analysts shift to exception review — not manual data retrieval.</p>
+      </div>
+
+      <div class="econ-grid" data-stagger>
+        <div class="econ-tile spotlight-card">
+          <div class="econ-val">30–40%</div>
+          <div class="econ-lbl">Financial Operations Automated</div>
+          <p class="econ-desc">McKinsey: 30–40% of back-office financial ops can be fully automated with governed AI
+            agents.</p>
+        </div>
+
+        <div class="econ-tile spotlight-card">
+          <div class="econ-val">10×</div>
+          <div class="econ-lbl">Faster Time-to-Market</div>
+          <p class="econ-desc">Pre-built verified MCPs cut integration from months to days — no bespoke connector work
+            per system.</p>
+        </div>
+
+        <div class="econ-tile spotlight-card">
+          <div class="econ-val">24/7</div>
+          <div class="econ-lbl">Global Execution</div>
+          <p class="econ-desc">AI agents run continuously across every timezone and legal entity — no shift handovers,
+            no manual queues.</p>
+        </div>
+
+        <div class="econ-tile spotlight-card">
+          <div class="econ-val">100%</div>
+          <div class="econ-lbl">Audit Coverage</div>
+          <p class="econ-desc">Every action is immutably logged with inputs, outputs, policy decisions and full lineage.
+            Regulators see everything.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ SECTION 10: FOUNDING TEAM ================================================================ -->
+  <section id="team" class="section-dark">
+    <div class="container">
+      <div class="section-head center" data-reveal>
+        <div class="eyebrow">Leadership</div>
+        <h2 class="wavy-h2">The Founding Team: Built by Enterprise & Research Pioneers</h2>
+        <p>We have a hand-picked team to disrupt the enterprise AI market.</p>
+      </div>
+
+      <div class="team-grid" data-stagger>
+        <!-- JAMSHED COOPER (JC) -->
+        <div class="team-card spotlight-card">
+          <div class="team-avatar-wrapper">
+            <img src="jc.png" alt="Jamshed Cooper (JC)" class="team-photo"
+              onerror="this.onerror=null; this.src='jc.jpg'; if(!this.complete||this.naturalWidth===0){this.src='jc.jpeg';} if(!this.complete||this.naturalWidth===0){this.style.display='none'; this.nextElementSibling.style.display='block';}">
+            <svg width="44" height="44" viewBox="0 0 64 64" fill="none" style="display:none;">
+              <circle cx="32" cy="24" r="13" stroke="#E8923C" stroke-width="2" />
+              <path d="M8 56c0-13.3 10.7-21 24-21s24 7.7 24 21" stroke="#E8923C" stroke-width="2" />
+            </svg>
+          </div>
+          <div class="team-info">
+            <h3 class="team-name">Jamshed Cooper (JC)</h3>
+            <div class="team-role">CEO Stackbase</div>
+            <p>Scaled enterprise platforms across 1,000+ applications; now building AI-callable MCP infrastructure,
+              backed by deep relationships across global banking.</p>
+          </div>
+        </div>
+
+        <!-- BAISHAKHI RAY (RAY) -->
+        <div class="team-card spotlight-card">
+          <div class="team-avatar-wrapper">
+            <img src="ray.png" alt="Baishakhi Ray" class="team-photo"
+              onerror="this.onerror=null; this.src='ray.jpg'; if(!this.complete||this.naturalWidth===0){this.src='ray.jpeg';} if(!this.complete||this.naturalWidth===0){this.style.display='none'; this.nextElementSibling.style.display='block';}">
+            <svg width="44" height="44" viewBox="0 0 64 64" fill="none" style="display:none;">
+              <circle cx="32" cy="24" r="13" stroke="#E8923C" stroke-width="2" />
+              <path d="M8 56c0-13.3 10.7-21 24-21s24 7.7 24 21" stroke="#E8923C" stroke-width="2" />
+            </svg>
+          </div>
+          <div class="team-info">
+            <h3 class="team-name">Baishakhi Ray</h3>
+            <div class="team-role">CTO Stackbase</div>
+            <p>Professor of Computer Science at Columbia and Director of the ARiSE Lab; Amazon Scholar whose research
+              underpins Stackbase's architecture and AI verification.</p>
+          </div>
+        </div>
+
+        <!-- IN KEUN KIM (INK) -->
+        <div class="team-card spotlight-card">
+          <div class="team-avatar-wrapper">
+            <img src="ink.png" alt="In Keun Kim" class="team-photo"
+              onerror="this.onerror=null; this.src='ink.jpg'; if(!this.complete||this.naturalWidth===0){this.src='ink.jpeg';} if(!this.complete||this.naturalWidth===0){this.style.display='none'; this.nextElementSibling.style.display='block';}">
+            <svg width="44" height="44" viewBox="0 0 64 64" fill="none" style="display:none;">
+              <circle cx="32" cy="24" r="13" stroke="#E8923C" stroke-width="2" />
+              <path d="M8 56c0-13.3 10.7-21 24-21s24 7.7 24 21" stroke="#E8923C" stroke-width="2" />
+            </svg>
+          </div>
+          <div class="team-info">
+            <h3 class="team-name">In Keun Kim</h3>
+            <div class="team-role">Founding Engineer</div>
+            <p>Expertise in building scalable AI systems in fintech, with a track record of taking AI products from 0→1.
+              Built Fintech products serving more than half of South Korea's population.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ FINAL CTA ================================================================ -->
+  <section class="final-cta">
+    <div class="container final-cta-inner" data-reveal>
+      <div class="final-logo-wrap">
+        <img src="logo.png" alt="Stackbase Systems Logo" style="height:56px; width:auto;">
+      </div>
+      <h2 class="final-h2">Make your legacy systems AI-ready.</h2>
+      <p class="final-sub">In final contract discussions with two Tier 1 global banks.<br>Research-grounded. Built by
+        the people who ran the systems we serve.</p>
+      <div class="final-ctas">
+        <a href="mailto:jc@stackbases.ai" class="btn-primary mag-btn" data-copy-email>
+          <span class="btn-primary-inner">jc@stackbases.ai →</span>
+        </a>
+        <a href="#top" class="btn-secondary">Back to top ↑</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ FOOTER ================================================================ -->
+  <footer>
+    <div class="container footer-inner">
+      <a href="#top" class="footer-brand">
+        <img src="logo.png" alt="Stackbase Systems" class="footer-logo" style="height:28px; width:auto;">
+      </a>
+      <div class="footer-meta">
+        <a href="mailto:jc@stackbases.ai" data-copy-email>jc@stackbases.ai</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js" defer></script>
+</body>
+
+</html>

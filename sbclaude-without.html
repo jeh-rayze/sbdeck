@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Without Stackbase — AI Cannot Reach Internal Systems</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --bg: #0a0a0a;
+    --surface: rgb(33,33,33);
+    --surface-2: rgb(47,47,47);
+    --border: rgba(255,255,255,0.1);
+    --text-dim: rgba(255,255,255,0.35);
+    --text-mid: rgba(255,255,255,0.6);
+    --text: rgba(255,255,255,0.9);
+    --mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    --sans: 'Inter', sans-serif;
+    --serif: 'Fraunces', Georgia, serif;
+    --danger: #e56269;
+    --danger-soft: rgba(229,98,105,0.14);
+    --danger-border: rgba(229,98,105,0.35);
+    --warn: #f5a623;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); font-family:var(--mono); color:var(--text);
+    padding:40px 24px; overflow-x:hidden;
+  }
+  .layout{
+    display:grid; grid-template-columns: 1.1fr 1.6fr 1.1fr; gap:24px;
+    max-width:1550px; margin:0 auto; align-items:start;
+    --side-accent: #e56269;
+    --side-accent-soft: rgba(229,98,105,0.12);
+    --side-accent-border: rgba(229,98,105,0.35);
+  }
+  .col{ display:flex; flex-direction:column; gap:24px; }
+
+  @keyframes riseIn{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:translateY(0); } }
+  .panel, .chat-panel{ animation: riseIn .6s ease both; }
+  .col .panel:nth-child(1){ animation-delay:.05s; }
+  .col .panel:nth-child(2){ animation-delay:.18s; }
+  .chat-panel{ animation-delay:.1s; }
+
+  .panel{
+    background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    padding:20px; transition:border-color .3s ease;
+  }
+  .panel:hover{ border-color:rgba(255,255,255,0.18); }
+  .label{ font-size:11px; letter-spacing:0.06em; color:var(--text-dim); text-transform:uppercase; margin-bottom:14px; }
+
+  .search-box{
+    display:flex; align-items:center; gap:8px; background:var(--surface-2);
+    border:1px solid var(--border); border-radius:10px; padding:9px 12px;
+    color:var(--text-dim); font-size:13px; margin-bottom:18px; opacity:0.4;
+  }
+
+  .blocker-banner{
+    background:var(--danger-soft); border:1px solid var(--danger-border); border-radius:10px;
+    padding:10px 14px; font-size:12px; color:var(--danger); margin-bottom:18px;
+    display:flex; align-items:center; gap:8px; font-weight:500;
+  }
+
+  .tool-item{
+    display:flex; gap:10px; align-items:flex-start; padding:10px 10px; border-radius:8px;
+    margin-bottom:4px; color:var(--text-dim); opacity:0.4; cursor:not-allowed;
+  }
+  .tool-item .icon{ width:20px; height:20px; flex:none; display:flex; align-items:center; justify-content:center; font-size:13px; margin-top:1px; }
+  .tool-item .title{ font-size:12px; color:var(--text-dim); font-weight:600; line-height:1.4; }
+  .tool-item .sub{ font-size:11px; color:var(--text-dim); margin-top:2px; opacity:0.6; }
+  .tool-item .lock-badge{ font-size:10px; color:var(--danger); border:1px solid var(--danger-border); border-radius:4px; padding:1px 5px; margin-left:auto; flex:none; }
+
+  .missing-list{ font-size:11px; color:var(--text-dim); margin-top:16px; }
+  .missing-list .heading{ font-size:11px; letter-spacing:.05em; color:var(--text-dim); margin-bottom:8px; }
+  .missing-list ul{ margin:0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:6px; }
+  .missing-list ul li{
+    padding:4px 8px; border-radius:4px; display:flex; align-items:center; gap:8px;
+    color:var(--danger); background:var(--danger-soft); border:1px solid rgba(229,98,105,0.2);
+  }
+  .missing-list ul li::before{ content:'✕'; font-size:10px; font-weight:700; }
+
+  .uc-select{ display:flex; flex-direction:column; gap:8px; }
+  .uc-chip{
+    text-align:left; background:var(--surface-2); border:1px solid var(--border); color:var(--text-mid);
+    font-family:var(--mono); font-size:12px; font-weight:600; padding:11px 12px; border-radius:10px; cursor:pointer;
+    transition: all .2s ease; display:flex; align-items:center; gap:9px; width:100%;
+  }
+  .uc-chip:hover{ border-color:var(--danger-border); color:var(--text); transform:translateX(2px); }
+  .uc-chip.sel{ background:var(--danger-soft); border-color:var(--danger-border); color:var(--text); box-shadow: inset 3px 0 0 var(--danger); }
+  .uc-chip .dot{ width:7px; height:7px; border-radius:50%; background:var(--danger); opacity:.35; flex:none; transition:opacity .2s ease; }
+  .uc-chip.sel .dot{ opacity:1; box-shadow:0 0 8px var(--danger); }
+  .uc-chip .uc-sub{ color:var(--text-dim); font-weight:400; font-size:10px; margin-left:auto; }
+
+  /* CENTER — CLAUDE CHAT (WITHOUT STACKBASE DANGER STATE) */
+  .chat-panel{
+    --accent: #e56269;
+    --accent-soft: rgba(229,98,105,0.18);
+    --send-fg: #ffffff;
+    --chat-sans: var(--sans);
+    --header-font: var(--serif);
+    background:var(--surface);
+    border:1px solid var(--danger-border);
+    border-radius:16px;
+    padding:0;
+    display:flex; flex-direction:column;
+    overflow:hidden;
+    position:relative;
+    font-family:var(--chat-sans);
+    box-shadow: 0 20px 60px -20px rgba(229,98,105,0.25);
+  }
+
+  .chat-header{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:14px 20px; font-size:13px; font-family:var(--header-font); position:relative;
+    border-bottom:1px solid var(--danger-border); background:rgba(229,98,105,0.06);
+  }
+  .no-badge{
+    position:absolute; left:16px; top:50%; transform:translateY(-50%);
+    font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--danger);
+    font-family:var(--mono); font-weight:500;
+    border:1px solid var(--danger-border); border-radius:20px; padding:3px 9px;
+  }
+  .mark-wrap{ position:relative; width:20px; height:20px; display:flex; align-items:center; justify-content:center; }
+  .mark-claude{ color:var(--danger); width:20px; height:20px; position:relative; z-index:1; }
+  .chat-header b{ font-weight:600; color:var(--text); }
+  .chat-header span.light{ color:var(--text-dim); font-weight:400; }
+
+  .msg-scroll{
+    display:flex; flex-direction:column; gap:14px; height:400px; overflow-y:auto;
+    padding:20px 20px 12px 20px; scrollbar-width:none;
+  }
+  .msg-scroll::-webkit-scrollbar{ display:none; }
+
+  .user-msg-row{ display:flex; justify-content:flex-end; }
+  .user-msg{
+    max-width:85%; background:var(--surface-2); color:var(--text); padding:10px 16px;
+    font-family:var(--chat-sans); font-size:13px; line-height:1.6; border-radius:12px;
+    opacity:0; transform: translateY(10px) scale(.94);
+    animation: bubbleIn .5s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes bubbleIn{ to{ opacity:1; transform:translateY(0) scale(1); } }
+
+  .thinking-row{
+    display:inline-flex; gap:4px; align-items:center; padding:2px 0;
+    opacity:0; animation: riseIn .4s ease forwards;
+  }
+  .thinking-row span{ width:5px; height:5px; border-radius:50%; background:var(--danger); animation: bounce 1.2s ease-in-out infinite; }
+  .thinking-row span:nth-child(2){ animation-delay:.15s; }
+  .thinking-row span:nth-child(3){ animation-delay:.3s; }
+  @keyframes bounce{ 0%,60%,100%{ transform:translateY(0); opacity:.4; } 30%{ transform:translateY(-4px); opacity:1; } }
+
+  .step{ opacity:0; animation: riseIn .45s ease forwards; }
+
+  .sys-label{ display:inline-flex; align-items:center; gap:5px; font-size:12px; line-height:1; letter-spacing:.03em; color:var(--danger); }
+  .sys-label .txt{ font-weight:500; text-transform:uppercase; font-family:var(--mono); }
+
+  .sys-text{ font-size:13px; line-height:1.65; color:var(--text-mid); opacity:0; animation: riseIn .45s ease forwards; }
+  .sys-text.error-msg{ color:var(--danger) !important; font-weight:500; font-size:13px; font-family:var(--chat-sans); }
+  .sys-text.warn-msg{ color:var(--warn); }
+
+  .error-card{
+    background:var(--danger-soft); border:1px solid var(--danger-border); border-radius:12px;
+    padding:14px 16px; font-size:12px; opacity:0; animation: riseIn .55s ease forwards;
+    border-left:3px solid var(--danger); max-width:92%;
+  }
+  .error-card .ec-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+  .error-card .ec-title{ font-weight:600; color:var(--danger); font-family:var(--chat-sans); font-size:13px; }
+  .error-card .ec-code{ font-family:var(--mono); color:var(--danger); font-size:10px; letter-spacing:.04em; margin-top:3px; opacity:0.7; }
+  .error-card .ec-row{ display:flex; justify-content:space-between; color:var(--text-dim); margin-top:7px; gap:12px; }
+  .error-card .ec-row b{ color:rgba(229,98,105,0.9); font-weight:500; text-align:right; }
+  .error-card .ec-divider{ height:1px; background:var(--danger-border); margin:11px 0; }
+  .error-card .ec-foot{ margin-top:10px; font-size:10px; color:var(--danger); display:flex; align-items:center; gap:5px; opacity:0.85; }
+
+  .type-cursor{
+    display:inline-block; width:2px; height:1em; background:var(--danger);
+    vertical-align:text-bottom; margin-left:1px; animation: blink 0.9s step-end infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  /* TRANSPORT BAR CONTROLS */
+  .reply-shell{ padding:0 12px 12px 12px; }
+  .transport{
+    background:var(--surface-2); border-radius:12px; padding:9px 12px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .t-btn{
+    width:34px; height:34px; border-radius:9px; border:1px solid var(--border); background:rgba(255,255,255,0.03);
+    color:var(--text-mid); display:flex; align-items:center; justify-content:center; cursor:pointer;
+    font-size:13px; line-height:1; transition: all .18s ease; flex:none;
+  }
+  .t-btn:hover{ color:var(--text); border-color:var(--danger-border); background:var(--danger-soft); }
+  .t-btn:active{ transform:scale(0.9); }
+  .t-btn.play{ background:var(--danger); color:#fff; border-color:transparent; font-size:12px; }
+  .t-btn.play:hover{ background:var(--danger); color:#fff; }
+  .t-label{ flex:1; font-family:var(--mono); font-size:11px; color:var(--text-mid); letter-spacing:.02em; text-align:right; padding-right:2px; }
+  .t-mode{
+    font-family:var(--mono); font-size:10px; padding:3px 8px; border-radius:20px;
+    border:1px solid var(--danger-border); color:var(--danger); letter-spacing:.06em; flex:none;
+  }
+
+  /* RIGHT COLUMN */
+  .kv-row{ display:flex; justify-content:space-between; font-size:12px; color:var(--text-dim); margin-bottom:12px; }
+  .kv-row b{ color:var(--text-mid); font-weight:500; }
+  .auth-label{
+    font-size:10px; letter-spacing:.08em; color:var(--danger); text-transform:uppercase;
+    margin:0 0 10px; display:flex; align-items:center; gap:6px;
+  }
+  .connection-item{
+    display:flex; align-items:center; justify-content:space-between; background:var(--surface-2);
+    border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:12px; opacity:0.45; cursor:not-allowed;
+  }
+  .connection-item .left{ display:flex; align-items:center; gap:10px; }
+  .connection-item .name{ color:var(--text-mid); font-weight:600; }
+  .connection-item .sub{ font-size:10px; color:var(--text-dim); }
+  .connection-item .block-x{ color:var(--danger); font-size:14px; font-weight:700; }
+
+  .no-access-box{
+    background:var(--danger-soft); border-radius:10px; padding:10px 12px; display:flex; align-items:center; gap:8px;
+    font-size:12px; color:var(--danger); margin-bottom:12px; font-weight:600;
+    border:1px solid var(--danger-border); min-height:38px;
+  }
+  .danger-list{ font-size:11px; color:var(--danger); display:flex; flex-direction:column; gap:6px; margin-top:10px; opacity:0.85; }
+  .danger-list div{ display:flex; align-items:center; gap:6px; }
+  .danger-list div::before{ content:'✕'; font-size:10px; font-weight:700; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- LEFT COLUMN -->
+  <div class="col">
+    <div class="panel">
+      <div class="label" id="searchLabel">Search internal tools</div>
+      <div class="search-box">🔍 <span id="searchText">search internal tools...</span></div>
+
+      <div class="blocker-banner" id="blockerBanner">
+        <span class="bicon">⊘</span>
+        <span id="blockerText">No tools available — not connected to internal systems</span>
+      </div>
+
+      <div id="toolList">
+        <div class="tool-item"><div class="icon">💳</div><div><div class="title"><span class="sys">Core Banking ·</span> CHECK_BALANCE</div><div class="sub">Verify funds in the source account</div></div><span class="lock-badge">NO ACCESS</span></div>
+        <div class="tool-item"><div class="icon">👤</div><div><div class="title"><span class="sys">Core Banking ·</span> VALIDATE_RECIPIENT</div><div class="sub">Confirm the destination account owner</div></div><span class="lock-badge">NO ACCESS</span></div>
+        <div class="tool-item"><div class="icon">↔️</div><div><div class="title"><span class="sys">Payment Rails ·</span> EXECUTE_TRANSFER</div><div class="sub">Move money between accounts</div></div><span class="lock-badge">NO ACCESS</span></div>
+      </div>
+
+      <div class="missing-list" id="missingList">
+        <div class="heading">MISSING</div>
+        <ul id="missingUl">
+          <li>No identity / SSO mapping</li>
+          <li>No entitlements or RBAC</li>
+          <li>No audit trail</li>
+          <li>No governance layer</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="label">Run Demo</div>
+      <div class="uc-select" id="ucSelect">
+        <button class="uc-chip sel" data-uc="0"><span class="dot"></span>Retail bank<span class="uc-sub">account transfer</span></button>
+        <button class="uc-chip" data-uc="1"><span class="dot"></span>Settlement break<span class="uc-sub">reconciliation</span></button>
+        <button class="uc-chip" data-uc="2"><span class="dot"></span>Compliance<span class="uc-sub">surveillance</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER — Claude, Failure state -->
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-header">
+      <span class="no-badge" id="themeBadge"></span>
+      <span class="mark-wrap">
+        <svg class="mark-claude" viewBox="0 0 24 24" fill="none">
+          <g stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+            <line x1="14.6" y1="12" x2="22" y2="12"/><line x1="14.25" y1="13.3" x2="20.66" y2="17"/>
+            <line x1="13.3" y1="14.25" x2="17" y2="20.66"/><line x1="12" y1="14.6" x2="12" y2="22"/>
+            <line x1="10.7" y1="14.25" x2="7" y2="20.66"/><line x1="9.75" y1="13.3" x2="3.34" y2="17"/>
+            <line x1="9.4" y1="12" x2="2" y2="12"/><line x1="9.75" y1="10.7" x2="3.34" y2="7"/>
+            <line x1="10.7" y1="9.75" x2="7" y2="3.34"/><line x1="12" y1="9.4" x2="12" y2="2"/>
+            <line x1="13.3" y1="9.75" x2="17" y2="3.34"/><line x1="14.25" y1="10.7" x2="20.66" y2="7"/>
+          </g>
+          <circle cx="12" cy="12" r="1.7" fill="currentColor"/>
+        </svg>
+      </span>
+      <b>Claude</b><span class="light"> Cowork</span>
+    </div>
+
+    <div class="msg-scroll" id="msgScroll"></div>
+
+    <div class="reply-shell">
+      <div class="transport">
+        <button class="t-btn" id="tRestart" title="Restart this use case">⟲</button>
+        <button class="t-btn" id="tPrev" title="Previous step">⏮</button>
+        <button class="t-btn play" id="tPlay" title="Play">▶</button>
+        <button class="t-btn" id="tNext" title="Next step">⏭</button>
+        <span class="t-label" id="tLabel">Retail bank · Step 1/4 · Prompt</span>
+        <span class="t-mode" id="tMode">AUTO</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="col">
+    <div class="panel">
+      <div class="label">Internal Enterprise Systems</div>
+      <div class="auth-label"><span>⊘</span> No Authentication</div>
+      <div class="kv-row"><span>USER:</span><b style="opacity:0.4">— unknown —</b></div>
+      <div class="kv-row"><span>AGENT ID:</span><b style="color:var(--danger);font-family:var(--mono);font-size:11px;opacity:0.7;">unidentified</b></div>
+      <div id="connList">
+        <div class="connection-item"><div class="left">🏦<div><div class="name">Core Banking API</div><div class="sub">Account &amp; balance lookup</div></div></div><div class="status"><span class="block-x">✕</span></div></div>
+        <div class="connection-item"><div class="left">💸<div><div class="name">Payment Rails</div><div class="sub">Internal transfer network</div></div></div><div class="status"><span class="block-x">✕</span></div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="label" style="display:flex;justify-content:space-between;"><span>No Control Plane</span><span style="color:var(--danger);font-size:10px;">UNPROTECTED</span></div>
+      <div class="no-access-box" id="noAccessBox">⊘ No governance layer active</div>
+      <div class="danger-list">
+        <div>No identity mapping</div>
+        <div>No entitlements checked</div>
+        <div>No approval workflow</div>
+        <div>No audit trail</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="label">Agent config</div>
+      <div class="kv-row"><span>AGENT</span><b style="opacity:0.4">Unknown Agent</b></div>
+      <div class="kv-row"><span>ACCESS</span><b style="color:var(--danger)">None — No Gateway</b></div>
+      <div class="kv-row" style="margin-bottom:0;"><span>MODEL</span><b style="opacity:0.6">Claude</b></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const delay = ms => new Promise(r => setTimeout(r, ms));
+const BEATS = 4;
+const BEAT_TITLES = ['Prompt', 'Attempt', 'Blocked', 'Error'];
+
+const SCENARIOS = [
+  {
+    key:'retail', name:'Retail bank', badge:'NO STACKBASE',
+    prompt: "Transfer $850 from my checking account ending 4821 to my savings account ending 7392.",
+    blockerText: "No tools available — not connected to internal systems",
+    missingItems: ["No identity / SSO mapping", "No entitlements or RBAC", "No audit trail", "No governance layer"],
+    tools: [
+      { icon:'💳', system:'Core Banking', tool:'CHECK_BALANCE', sub:'Verify funds in the source account' },
+      { icon:'👤', system:'Core Banking', tool:'VALIDATE_RECIPIENT', sub:'Confirm the destination account owner' },
+      { icon:'↔️', system:'Payment Rails', tool:'EXECUTE_TRANSFER', sub:'Move money between accounts' },
+    ],
+    connections: [
+      { emoji:'🏦', name:'Core Banking API', sub:'Account & balance lookup' },
+      { emoji:'💸', name:'Payment Rails', sub:'Internal transfer network' },
+    ],
+    attemptMsg: "Searching for tools to access Core Banking and Payment Rails...",
+    blockMsg: "No connectors available for internal systems.",
+    errorTitle: "Connection Refused",
+    errorCode: "ERR-503",
+    errorRows: [
+      ["System", "Core Banking API"],
+      ["Reason", "No connector registered"],
+      ["Identity", "Unknown — no SSO"],
+      ["Entitlements", "None — no RBAC"],
+    ],
+    errorFoot: "No audit trail — this attempt is untracked",
+    answer: "I'm sorry, but I don't have tools to connect with your internal banking systems. Without Stackbase, I cannot access Core Banking or Payment Rails — no identity has been established, no entitlements are configured, and there is no governance layer to authorize this request.",
+  },
+  {
+    key:'settlement', name:'Settlement break', badge:'NO STACKBASE',
+    prompt: "Investigate and fix settlement break BRK-4471 — the EUR 2.0M bond trade failing settlement today.",
+    blockerText: "No tools available — Settlement System not reachable",
+    missingItems: ["No settlement system connector", "No SSI access", "No maker-checker workflow", "No audit trail"],
+    tools: [
+      { icon:'🔎', system:'Settlement System', tool:'FIND_TRADE', sub:'Locate the failing settlement' },
+      { icon:'📋', system:'Recon Engine', tool:'VERIFY_SSI', sub:'Check standing settlement instructions' },
+      { icon:'♻️', system:'Payment Engine', tool:'REPOST', sub:'Re-book and release the payment' },
+    ],
+    connections: [
+      { emoji:'🏛️', name:'Settlement System', sub:'Failing trades & breaks' },
+      { emoji:'📋', name:'Recon Engine', sub:'SSI & cash reconciliation' },
+      { emoji:'💸', name:'Payment Engine', sub:'Re-book & release payment' },
+    ],
+    attemptMsg: "Searching for tools to access Settlement System and Recon Engine...",
+    blockMsg: "No connectors available for settlement infrastructure.",
+    errorTitle: "No Connector Available",
+    errorCode: "ERR-404",
+    errorRows: [
+      ["System", "Settlement System"],
+      ["Break ref", "BRK-4471 — unreachable"],
+      ["Identity", "Unknown — no SSO"],
+      ["Approval", "No maker-checker"],
+    ],
+    errorFoot: "Break BRK-4471 will remain unresolved — no tools to act",
+    answer: "I'm sorry, but I don't have tools to investigate settlement breaks in your internal systems. Without Stackbase, I cannot access the Settlement System, Recon Engine, or Payment Engine. The break BRK-4471 cannot be investigated or resolved — no governance layer exists to safely authorize access.",
+  },
+  {
+    key:'compliance', name:'Compliance', badge:'NO STACKBASE',
+    prompt: "Review surveillance alert ALT-2093 on the equities desk — a potential spoofing flag from this morning.",
+    blockerText: "No tools available — Surveillance System not accessible",
+    missingItems: ["No surveillance connector", "No market data access", "No case management link", "No immutable audit trail"],
+    tools: [
+      { icon:'🚩', system:'Surveillance System', tool:'FIND_ALERTS', sub:'Pull the flagged orders' },
+      { icon:'📈', system:'OMS / Market Data', tool:'GET_CONTEXT', sub:'Rebuild order & market context' },
+      { icon:'🗂️', system:'Case Management', tool:'FILE_EVIDENCE', sub:'Write up verified evidence' },
+    ],
+    connections: [
+      { emoji:'🚩', name:'Surveillance System', sub:'Alerts & signals' },
+      { emoji:'📈', name:'OMS / Market Data', sub:'Orders & market context' },
+      { emoji:'🗂️', name:'Case Management', sub:'Case notes & audit' },
+    ],
+    attemptMsg: "Searching for tools to access Surveillance System and OMS...",
+    blockMsg: "No connectors available for compliance infrastructure.",
+    errorTitle: "Access Denied",
+    errorCode: "ERR-401",
+    errorRows: [
+      ["Alert", "ALT-2093 — unreachable"],
+      ["System", "Surveillance System"],
+      ["Identity", "Unknown — no SSO"],
+      ["Evidence", "Cannot be filed — no tools"],
+    ],
+    errorFoot: "ALT-2093 cannot be reviewed — regulator risk unmitigated",
+    answer: "I'm sorry, but I don't have tools to review surveillance alerts in your compliance systems. Without Stackbase, I cannot access the Surveillance System, OMS, or Case Management. Alert ALT-2093 cannot be investigated — no identity, entitlements, or governance layer exists to authorize this request safely.",
+  },
+];
+
+let uc = 0, step = -1, playing = true, driveToken = 0;
+
+const chatPanel = document.getElementById('chatPanel');
+const msgScroll = document.getElementById('msgScroll');
+const themeBadge = document.getElementById('themeBadge');
+const searchText = document.getElementById('searchText');
+const toolList = document.getElementById('toolList');
+const missingUl = document.getElementById('missingUl');
+const blockerBanner = document.getElementById('blockerBanner');
+const blockerText = document.getElementById('blockerText');
+const connList = document.getElementById('connList');
+const noAccessBox = document.getElementById('noAccessBox');
+const tPlay = document.getElementById('tPlay');
+const tPrev = document.getElementById('tPrev');
+const tNext = document.getElementById('tNext');
+const tRestart = document.getElementById('tRestart');
+const tLabel = document.getElementById('tLabel');
+const tMode = document.getElementById('tMode');
+const ucChips = Array.from(document.querySelectorAll('.uc-chip'));
+
+function scrollDown(){ msgScroll.scrollTop = msgScroll.scrollHeight; }
+
+function renderScenario(cfg){
+  themeBadge.textContent = cfg.badge;
+  searchText.textContent = 'search internal tools...';
+  blockerText.textContent = cfg.blockerText;
+  toolList.innerHTML = cfg.tools.map(t=>`
+    <div class="tool-item"><div class="icon">${t.icon}</div><div><div class="title"><span class="sys">${t.system} ·</span> ${t.tool}</div><div class="sub">${t.sub}</div></div><span class="lock-badge">NO ACCESS</span></div>`).join('');
+  missingUl.innerHTML = cfg.missingItems.map(m=>`<li>${m}</li>`).join('');
+  connList.innerHTML = cfg.connections.map(c=>`
+    <div class="connection-item"><div class="left">${c.emoji}<div><div class="name">${c.name}</div><div class="sub">${c.sub}</div></div></div><div class="status"><span class="block-x">✕</span></div></div>`).join('');
+}
+
+function errorCard(cfg){
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+  return `<div class="error-card">
+    <div class="ec-head"><div><div class="ec-title">✕ ${cfg.errorTitle}</div><div class="ec-code">${cfg.errorCode} · ${timeStr}</div></div></div>
+    ${cfg.errorRows.map(([k,v])=>`<div class="ec-row"><span>${k}</span><b>${v}</b></div>`).join('')}
+    <div class="ec-divider"></div>
+    <div class="ec-foot">⊘ ${cfg.errorFoot}</div>
+  </div>`;
+}
+
+function addNode(html){
+  const wrap = document.createElement('div');
+  wrap.innerHTML = html;
+  const node = wrap.firstElementChild;
+  msgScroll.appendChild(node);
+  scrollDown();
+  return node;
+}
+
+async function typeInto(el, text, speed){
+  el.innerHTML = '';
+  const span = document.createElement('span');
+  const cursor = document.createElement('span');
+  cursor.className = 'type-cursor';
+  el.appendChild(span); el.appendChild(cursor);
+  for(let i=0;i<text.length;i++){ span.textContent += text[i]; await delay(speed + Math.random()*20); }
+  cursor.remove();
+}
+
+function initUseCase(cfg){
+  renderScenario(cfg);
+  msgScroll.innerHTML = '';
+  noAccessBox.textContent = '⊘ No governance layer active';
+}
+
+async function applyBeat(cfg, k, animate){
+  switch(k){
+    case 0: { // Prompt
+      addNode(`<div class="user-msg-row"><div class="user-msg">${cfg.prompt}</div></div>`);
+      if(animate){
+        const th = addNode(`<div class="thinking-row"><span></span><span></span><span></span></div>`);
+        await delay(1200);
+        th.remove();
+      }
+      break;
+    }
+    case 1: { // Attempt
+      addNode(`<div class="step"><div class="sys-label"><span class="txt">⟳ Searching for tools...</span></div></div>`);
+      if(animate) await delay(1000);
+      addNode(`<div class="sys-text warn-msg" style="opacity:1;">⚠️ ${cfg.attemptMsg}</div>`);
+      if(animate) await delay(900);
+      break;
+    }
+    case 2: { // Blocked
+      noAccessBox.textContent = `⊘ ${cfg.blockMsg}`;
+      addNode(`<div class="step"><div class="sys-label"><span class="txt">✕ No connectors available</span></div></div>`);
+      if(animate) await delay(900);
+      addNode(errorCard(cfg));
+      if(animate) await delay(600);
+      break;
+    }
+    case 3: { // Error response
+      const ans = addNode(`<div class="sys-text error-msg" style="opacity:1;"></div>`);
+      if(animate) await typeInto(ans, cfg.answer, 20);
+      else ans.textContent = cfg.answer;
+      scrollDown();
+      break;
+    }
+  }
+}
+
+function selectChip(idx){ ucChips.forEach((c,i) => c.classList.toggle('sel', i===idx)); }
+function updateTransport(){
+  const cfg = SCENARIOS[uc];
+  const s = Math.max(step, 0);
+  tLabel.textContent = `${cfg.name} · Step ${s+1}/${BEATS} · ${BEAT_TITLES[s]}`;
+  tMode.textContent = playing ? 'AUTO' : 'MANUAL';
+  tPlay.textContent = playing ? '⏸' : '▶';
+  tPlay.title = playing ? 'Pause' : 'Play';
+}
+
+async function renderTo(newUc, newStep){
+  uc = newUc; step = newStep;
+  const cfg = SCENARIOS[uc];
+  selectChip(uc);
+  initUseCase(cfg);
+  for(let k=0;k<=step;k++){ await applyBeat(cfg, k, false); }
+  updateTransport();
+}
+
+async function drive(){
+  const my = ++driveToken;
+  playing = true; updateTransport();
+  while(my === driveToken && playing){
+    if(step >= BEATS-1){
+      await delay(2800); if(my !== driveToken || !playing) return;
+      uc = (uc+1) % SCENARIOS.length;
+      step = -1;
+      initUseCase(SCENARIOS[uc]);
+      selectChip(uc);
+      msgScroll.innerHTML = '';
+      if(my !== driveToken || !playing) return;
+    }
+    step++;
+    await applyBeat(SCENARIOS[uc], step, true);
+    updateTransport();
+    if(my !== driveToken || !playing) return;
+    await delay(700);
+  }
+}
+
+function pause(){ playing = false; driveToken++; updateTransport(); }
+function nextPos(){ return step < BEATS-1 ? [uc, step+1] : [(uc+1) % SCENARIOS.length, 0]; }
+function prevPos(){ return step > 0 ? [uc, step-1] : [(uc-1+SCENARIOS.length) % SCENARIOS.length, BEATS-1]; }
+
+tPlay.addEventListener('click', ()=>{ if(playing) pause(); else drive(); });
+tNext.addEventListener('click', ()=>{ pause(); const [u,s]=nextPos(); renderTo(u,s); });
+tPrev.addEventListener('click', ()=>{ pause(); const [u,s]=prevPos(); renderTo(u,s); });
+tRestart.addEventListener('click', ()=>{ pause(); renderTo(uc, 0); });
+ucChips.forEach(chip => chip.addEventListener('click', ()=>{
+  pause();
+  renderTo(parseInt(chip.dataset.uc,10), 0);
+}));
+
+window.addEventListener('keydown', e=>{
+  if(e.key === 'ArrowRight'){ e.preventDefault(); tNext.click(); }
+  else if(e.key === 'ArrowLeft'){ e.preventDefault(); tPrev.click(); }
+  else if(e.key === ' '){ e.preventDefault(); tPlay.click(); }
+});
+
+uc = 0; step = -1;
+initUseCase(SCENARIOS[0]);
+selectChip(0);
+drive();
+</script>
+
+</body>
+</html>

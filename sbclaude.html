@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)file:///Users/jcooper/Downloads/stackbase_diagram_1.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>StackBase Systems — Governed AI on Internal Systems</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --bg: #0a0a0a;
+    --surface: rgb(33,33,33);
+    --surface-2: rgb(47,47,47);
+    --border: rgba(255,255,255,0.1);
+    --text-dim: rgba(255,255,255,0.35);
+    --text-mid: rgba(255,255,255,0.6);
+    --text: rgba(255,255,255,0.9);
+    --mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    --sans: 'Inter', sans-serif;
+    --serif: 'Fraunces', Georgia, serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); font-family:var(--mono); color:var(--text);
+    padding:40px 24px; overflow-x:hidden;
+  }
+  .layout{
+    display:grid; grid-template-columns: 1.1fr 1.6fr 1.1fr; gap:24px;
+    max-width:1550px; margin:0 auto; align-items:start;
+    --side-accent: #d97757;
+    --side-accent-soft: rgba(217,119,87,0.12);
+    --side-accent-border: rgba(217,119,87,0.35);
+  }
+  .col{ display:flex; flex-direction:column; gap:24px; }
+
+  @keyframes riseIn{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:translateY(0); } }
+  .panel, .chat-panel{ animation: riseIn .6s ease both; }
+  .col .panel:nth-child(1){ animation-delay:.05s; }
+  .col .panel:nth-child(2){ animation-delay:.18s; }
+  .col .panel:nth-child(3){ animation-delay:.3s; }
+  .chat-panel{ animation-delay:.1s; }
+
+  .panel{
+    background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    padding:20px; transition:border-color .3s ease;
+  }
+  .panel:hover{ border-color:rgba(255,255,255,0.18); }
+  .label{ font-size:11px; letter-spacing:0.06em; color:var(--text-dim); text-transform:uppercase; margin-bottom:14px; }
+
+  .search-box{
+    display:flex; align-items:center; gap:8px; background:var(--surface-2);
+    border:1px solid var(--border); border-radius:10px; padding:9px 12px;
+    color:var(--text-dim); font-size:13px; margin-bottom:18px; position:relative; overflow:hidden;
+  }
+  .search-box::after{
+    content:''; position:absolute; top:0; left:-100%; width:60%; height:100%;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    animation: sweep 4.5s ease-in-out infinite;
+  }
+  @keyframes sweep{ 0%{ left:-60%; } 50%{ left:120%; } 100%{ left:120%; } }
+
+  .tool-item{
+    display:flex; gap:10px; align-items:flex-start; padding:10px 10px; border-radius:8px;
+    margin-bottom:4px; color:var(--text-dim); transition: background .25s ease, transform .25s ease; cursor:default;
+  }
+  .tool-item:hover{ background:rgba(255,255,255,0.04); transform: translateX(3px); }
+  .tool-item.active{
+    background:color-mix(in srgb, var(--side-accent) 10%, transparent);
+    border:1px solid var(--side-accent-border);
+    transform: translateX(4px); box-shadow: inset 3px 0 0 var(--side-accent);
+  }
+  .tool-item.done{ opacity:.45; transform:none; }
+  .tool-item .icon{ width:20px; height:20px; flex:none; display:flex; align-items:center; justify-content:center; font-size:13px; margin-top:1px; }
+  .tool-item .title{ font-size:12px; color:var(--text-mid); font-weight:600; transition: color .3s ease; line-height:1.4; }
+  .tool-item .title .sys{ color:var(--side-accent); font-weight:600; }
+  .tool-item.active .title{ color:var(--text); }
+  .tool-item .sub{ font-size:11px; color:var(--text-dim); margin-top:2px; }
+
+  .plan-warn{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:18px; font-size:11px; color:var(--text-dim); }
+  .plan-warn .heading{ font-size:11px; letter-spacing:.05em; color:var(--text-dim); margin-bottom:8px; }
+  .plan-warn ol, .plan-warn ul{ margin:0; padding-left:14px; color:var(--text-dim); display:flex; flex-direction:column; gap:6px; list-style:none; padding-left:0; }
+  .plan-warn ol li{
+    padding:3px 6px; border-radius:4px; transition: background .3s ease, color .3s ease, transform .3s ease;
+  }
+  .plan-warn ol li.active{
+    background:var(--side-accent-soft); color:var(--text-mid); transform: translateX(4px);
+  }
+  .plan-warn ul li{
+    padding:3px 6px; border-radius:4px; transition: background .3s ease, color .3s ease;
+  }
+  .plan-warn ul li.active{
+    background:rgba(217,119,87,0.14); color:var(--side-accent);
+  }
+  .plan-warn ol li.done{ color:var(--text-dim); opacity:.5; }
+
+  /* Run demo selector */
+  .uc-select{ display:flex; flex-direction:column; gap:8px; }
+  .uc-chip{
+    text-align:left; background:var(--surface-2); border:1px solid var(--border); color:var(--text-mid);
+    font-family:var(--mono); font-size:12px; font-weight:600; padding:11px 12px; border-radius:10px; cursor:pointer;
+    transition: all .2s ease; display:flex; align-items:center; gap:9px; width:100%;
+  }
+  .uc-chip:hover{ border-color:var(--side-accent-border); color:var(--text); transform:translateX(2px); }
+  .uc-chip.sel{ background:var(--side-accent-soft); border-color:var(--side-accent-border); color:var(--text); box-shadow: inset 3px 0 0 var(--side-accent); }
+  .uc-chip .dot{ width:7px; height:7px; border-radius:50%; background:var(--side-accent); opacity:.35; flex:none; transition:opacity .2s ease; }
+  .uc-chip.sel .dot{ opacity:1; box-shadow:0 0 8px var(--side-accent); }
+  .uc-chip .uc-sub{ color:var(--text-dim); font-weight:400; font-size:10px; margin-left:auto; }
+  .demo-hint{ font-size:11px; color:var(--text-dim); margin-top:14px; line-height:1.6; }
+  .demo-hint b{ color:var(--text-mid); font-weight:600; }
+
+  /* ============ CENTER — CLAUDE CHAT, THREE USE CASES ============ */
+  .chat-panel{
+    --accent: #d97757;
+    --accent-soft: rgba(217,119,87,0.18);
+    --accent-glow: rgba(217,119,87,0.16);
+    --accent-2: #e8a184;
+    --send-fg: #191410;
+    --chat-sans: var(--sans);
+    --header-font: var(--serif);
+    --compose-font: var(--mono);
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:0;
+    display:flex; flex-direction:column;
+    overflow:hidden;
+    position:relative;
+    font-family:var(--chat-sans);
+    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.7);
+    animation: riseIn .6s ease both, panelGlow 5s ease-in-out infinite;
+    transition: box-shadow .5s ease;
+  }
+  @keyframes panelGlow{
+    0%,100%{ box-shadow: 0 20px 60px -20px rgba(0,0,0,0.7), 0 0 40px -20px color-mix(in srgb, var(--accent) 5%, transparent); }
+    50%{ box-shadow: 0 20px 60px -20px rgba(0,0,0,0.7), 0 0 60px -15px color-mix(in srgb, var(--accent) 16%, transparent); }
+  }
+
+  .chat-panel.theme-switch-out{ animation: slideOutLeft .45s ease forwards; }
+  .chat-panel.theme-switch-in{ animation: slideInRight .45s ease forwards; }
+  @keyframes slideOutLeft{ to{ opacity:0; transform:translateX(-28px); } }
+  @keyframes slideInRight{ from{ opacity:0; transform:translateX(28px); } to{ opacity:1; transform:translateX(0); } }
+
+  .chat-header{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:14px 20px; font-size:13px; font-family:var(--header-font); position:relative;
+  }
+  .mark-wrap{ position:relative; width:20px; height:20px; display:flex; align-items:center; justify-content:center; }
+  .mark-wrap::before{
+    content:''; position:absolute; inset:-7px; border-radius:50%;
+    background: radial-gradient(circle, var(--accent-soft), transparent 70%);
+    animation: breathe 2.6s ease-in-out infinite;
+  }
+  .mark-wrap.thinking::before{ animation: breathe 0.9s ease-in-out infinite; }
+  .mark-claude{ color:var(--accent); width:20px; height:20px; position:relative; z-index:1; animation: spin 14s linear infinite; }
+  .mark-wrap.thinking .mark-claude{ animation: spin 2.4s linear infinite; }
+  @keyframes breathe{ 0%,100%{ transform:scale(0.85); opacity:.5; } 50%{ transform:scale(1.25); opacity:1; } }
+  @keyframes spin{ from{ transform:rotate(0deg); } to{ transform:rotate(360deg); } }
+  .chat-header b{ font-weight:600; color:var(--text); }
+  .chat-header span.light{ color:var(--text-dim); font-weight:400; }
+
+  .theme-badge{
+    position:absolute; left:16px; top:50%; transform:translateY(-50%);
+    font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent);
+    font-family:var(--mono); opacity:.9; font-weight:500;
+    border:1px solid var(--side-accent-border); border-radius:20px; padding:3px 9px;
+  }
+
+  .msg-scroll{
+    display:flex; flex-direction:column; gap:14px; height:400px; overflow-y:auto;
+    padding:20px 20px 12px 20px; scrollbar-width:none;
+  }
+  .msg-scroll::-webkit-scrollbar{ display:none; }
+
+  .user-msg-row{ display:flex; justify-content:flex-end; }
+  .user-msg{
+    max-width:85%; background:var(--surface-2); color:var(--text); padding:10px 16px;
+    font-family:var(--chat-sans); font-size:13px; line-height:1.6; border-radius:12px;
+    opacity:0; transform: translateY(10px) scale(.94);
+    animation: bubbleIn .5s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes bubbleIn{ to{ opacity:1; transform:translateY(0) scale(1); } }
+
+  .thinking-row{
+    display:inline-flex; gap:4px; align-items:center; padding:2px 0;
+    opacity:0; animation: riseIn .4s ease forwards;
+  }
+  .thinking-row span{ width:5px; height:5px; border-radius:50%; background:var(--text-dim); animation: bounce 1.2s ease-in-out infinite; }
+  .thinking-row span:nth-child(2){ animation-delay:.15s; }
+  .thinking-row span:nth-child(3){ animation-delay:.3s; }
+  @keyframes bounce{ 0%,60%,100%{ transform:translateY(0); opacity:.4; } 30%{ transform:translateY(-4px); opacity:1; } }
+
+  .step{ opacity:0; animation: riseIn .45s ease forwards; }
+  .step.settled{ opacity:.35 !important; transition:opacity .5s ease; }
+
+  .sys-label{ display:inline-flex; align-items:center; gap:5px; font-size:12px; line-height:1; letter-spacing:.03em; color:var(--text-dim); }
+  .sys-label .txt{ font-weight:500; text-transform:uppercase; font-family:var(--mono); }
+  .sys-label.shimmer .txt{
+    background-image: linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.7) 40%,
+      var(--accent) 50%, rgba(255,255,255,0.7) 60%, rgba(255,255,255,0.3) 100%);
+    background-size:200% 100%; -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation: shimmer-text 1.6s ease-in-out infinite;
+  }
+  @keyframes shimmer-text{ 0%{ background-position: 200% 0; } 100%{ background-position: -200% 0; } }
+  .deco-icon{ width:12px; height:12px; flex:none; }
+
+  .progress-track{ height:2px; width:100%; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; margin-top:6px; }
+  .progress-fill{ height:100%; width:0%; background:linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius:2px; transition:width 1.4s cubic-bezier(.2,.7,.3,1); }
+
+  .sys-text{ font-size:13px; line-height:1.65; color:var(--text-mid); opacity:0; animation: riseIn .45s ease forwards; }
+  .sys-text .count{ color:var(--accent); font-weight:600; font-family:var(--mono); }
+  .sys-text.strong{ color:var(--text); font-weight:500; font-size:14px; font-family:var(--chat-sans); }
+
+  .twofa-step{
+    display:flex; align-items:center; gap:10px; padding:10px 12px;
+    background:var(--surface-2); border-radius:10px; border:1px solid rgba(255,255,255,0.06);
+    opacity:0; animation: riseIn .45s ease forwards;
+  }
+  .twofa-step .lock{ font-size:16px; line-height:1; }
+  .twofa-step .twofa-body{ flex:1; }
+  .twofa-step .twofa-title{ font-size:12px; font-weight:600; color:var(--text); font-family:var(--chat-sans); }
+  .twofa-step .twofa-sub{ font-size:11px; color:var(--text-dim); margin-top:2px; }
+  .twofa-dots{ display:flex; gap:5px; }
+  .twofa-dots span{
+    width:8px; height:8px; border-radius:50%; border:1.5px solid var(--accent);
+    animation: twofaFill .55s ease forwards;
+  }
+  .twofa-dots span:nth-child(1){ animation-delay:.25s; }
+  .twofa-dots span:nth-child(2){ animation-delay:.55s; }
+  .twofa-dots span:nth-child(3){ animation-delay:.85s; }
+  .twofa-dots span:nth-child(4){ animation-delay:1.15s; }
+  .twofa-dots span:nth-child(5){ animation-delay:1.45s; }
+  .twofa-dots span:nth-child(6){ animation-delay:1.75s; }
+  @keyframes twofaFill{ to{ background:var(--accent); } }
+
+  .receipt-card{
+    background:var(--surface-2); border:1px solid var(--border); border-radius:12px;
+    padding:14px 16px; font-size:12px; opacity:0; animation: riseIn .55s ease forwards;
+    border-left:3px solid var(--accent); max-width:92%;
+  }
+  .receipt-card .rc-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+  .receipt-card .rc-title{ font-weight:600; color:var(--text); font-family:var(--chat-sans); font-size:13px; }
+  .receipt-card .rc-ref{ font-family:var(--mono); color:var(--accent); font-size:10px; letter-spacing:.04em; margin-top:3px; }
+  .receipt-card .rc-date{ font-size:10px; color:var(--text-dim); text-align:right; font-family:var(--mono); }
+  .receipt-card .rc-row{ display:flex; justify-content:space-between; color:var(--text-dim); margin-top:7px; gap:12px; }
+  .receipt-card .rc-row b{ color:var(--text-mid); font-weight:500; text-align:right; }
+  .receipt-card .rc-divider{ height:1px; background:var(--border); margin:11px 0; }
+  .receipt-card .rc-total{ display:flex; justify-content:space-between; font-weight:600; color:var(--text); font-family:var(--chat-sans); font-size:13px; }
+  .receipt-card .rc-foot{ margin-top:10px; font-size:10px; color:#7fae83; display:flex; align-items:center; gap:5px; }
+  .type-cursor{
+    display:inline-block; width:2px; height:1em; background:var(--accent);
+    vertical-align:text-bottom; margin-left:1px; animation: blink 0.9s step-end infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  /* transport controls */
+  .reply-shell{ padding:0 12px 12px 12px; }
+  .transport{
+    background:var(--surface-2); border-radius:12px; padding:9px 12px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .t-btn{
+    width:34px; height:34px; border-radius:9px; border:1px solid var(--border); background:rgba(255,255,255,0.03);
+    color:var(--text-mid); display:flex; align-items:center; justify-content:center; cursor:pointer;
+    font-size:13px; line-height:1; transition: all .18s ease; flex:none;
+  }
+  .t-btn:hover{ color:var(--text); border-color:var(--side-accent-border); background:var(--side-accent-soft); }
+  .t-btn:active{ transform:scale(0.9); }
+  .t-btn.play{ background:var(--accent); color:var(--send-fg); border-color:transparent; font-size:12px; }
+  .t-btn.play:hover{ background:var(--accent); color:var(--send-fg); }
+  .t-label{ flex:1; font-family:var(--mono); font-size:11px; color:var(--text-mid); letter-spacing:.02em; text-align:right; padding-right:2px; }
+  .t-mode{
+    font-family:var(--mono); font-size:10px; padding:3px 8px; border-radius:20px;
+    border:1px solid var(--side-accent-border); color:var(--accent); letter-spacing:.06em; flex:none;
+  }
+
+  /* right column */
+  .kv-row{ display:flex; justify-content:space-between; font-size:12px; color:var(--text-dim); margin-bottom:12px; }
+  .kv-row b{ color:var(--text-mid); font-weight:500; }
+  .auth-label{
+    font-size:10px; letter-spacing:.08em; color:var(--text-dim); text-transform:uppercase;
+    margin:0 0 10px; display:flex; align-items:center; gap:6px;
+  }
+  .auth-label .lk{ font-size:11px; }
+  .agent-id{ font-family:var(--mono); color:var(--accent) !important; font-size:11px; }
+  .connection-item{
+    display:flex; align-items:center; justify-content:space-between; background:var(--surface-2);
+    border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:12px; transition: background .2s ease;
+  }
+  .connection-item:hover{ background:rgba(255,255,255,0.06); }
+  .connection-item .left{ display:flex; align-items:center; gap:10px; }
+  .connection-item .name{ color:var(--text-mid); font-weight:600; }
+  .connection-item .sub{ font-size:10px; color:var(--text-dim); }
+  .connection-item .status{ display:flex; align-items:center; gap:5px; }
+  .connection-item .status .led{ width:6px; height:6px; border-radius:50%; background:#4a4a4a; }
+  .connection-item.active .status .led{ background:#7fd396; box-shadow:0 0 0 0 rgba(127,211,150,.5); animation: ping2 2s ease-out infinite; }
+  .connection-item.busy{ background:rgba(127,211,150,0.08); border:1px solid rgba(127,211,150,0.2); }
+  .connection-item.busy .status .led{ background:#7fd396; animation: ping2 1s ease-out infinite; }
+  .connection-item.idle .status .led{ background:#4a4a4a; animation:none; box-shadow:none; }
+  @keyframes ping2{ 0%{ box-shadow:0 0 0 0 rgba(127,211,150,.45); } 70%{ box-shadow:0 0 0 5px rgba(127,211,150,0); } 100%{ box-shadow:0 0 0 0 rgba(127,211,150,0); } }
+
+  .exec-box{
+    background:var(--surface-2); border-radius:10px; padding:10px 12px; display:flex; align-items:center; gap:8px;
+    font-size:12px; color:var(--text-dim); margin-bottom:12px; font-weight:600;
+    transition: color .3s ease, border-color .3s ease, background .3s ease;
+    border:1px solid transparent; min-height:38px;
+  }
+  .exec-box.running{ color:var(--text-mid); border-color:rgba(255,255,255,0.08); animation: execPulse 1.4s ease-in-out infinite; }
+  .exec-box.done{ color:var(--text-mid); border-color:rgba(127,211,150,0.25); background:rgba(127,211,150,0.06); }
+  @keyframes execPulse{ 0%,100%{ opacity:.85; } 50%{ opacity:1; } }
+  .session-tag{ font-size:10px; color:var(--text-dim); transition: color .3s ease; }
+  .session-tag.live{ color:#7fae83; }
+  .db-info{ font-size:11px; color:var(--text-dim); display:flex; justify-content:space-between; padding:0 2px; }
+  .db-info .col2{ text-align:right; color:var(--text-mid); }
+  .db-info .col2 div{ opacity:0; transform:translateY(4px); transition: opacity .4s ease, transform .4s ease; }
+  .db-info .col2.reveal div{ opacity:1; transform:translateY(0); }
+  .status-line{
+    font-size:11px; color:#7fae83; margin-top:12px; display:flex; align-items:center; gap:6px;
+    opacity:0; transform:translateY(6px); transition: opacity .5s ease, transform .5s ease;
+  }
+  .status-line.show{ opacity:1; transform:translateY(0); }
+  .status-line .check{ animation: pop .4s ease .1s both; }
+  .agent-val{ transition: color .3s ease; }
+  @keyframes pop{ 0%{ transform:scale(0); } 70%{ transform:scale(1.3); } 100%{ transform:scale(1); } }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- LEFT COLUMN -->
+  <div class="col">
+    <div class="panel">
+      <div class="label" id="searchLabel">Search internal tools</div>
+      <div class="search-box">🔍 <span id="searchText">search internal tools...</span></div>
+      <div id="toolList">
+    <div class="tool-item" id="tool0"><div class="icon">💳</div><div><div class="title"><span class="sys">Core Banking ·</span> CHECK_BALANCE</div><div class="sub">Verify funds in the source account</div></div></div>
+    <div class="tool-item" id="tool1"><div class="icon">👤</div><div><div class="title"><span class="sys">Core Banking ·</span> VALIDATE_RECIPIENT</div><div class="sub">Confirm the destination account owner</div></div></div>
+    <div class="tool-item" id="tool2"><div class="icon">↔️</div><div><div class="title"><span class="sys">Payment Rails ·</span> EXECUTE_TRANSFER</div><div class="sub">Move money between accounts</div></div></div></div>
+      <div class="plan-warn">
+        <div>
+          <div class="heading">PLAN</div>
+          <ol id="planList" style="list-style:decimal; padding-left:14px;"><li id="plan0">Verify source balance</li><li id="plan1">Validate recipient</li><li id="plan2">Check transfer limit</li><li id="plan3">Execute transfer</li></ol>
+        </div>
+        <div>
+          <div class="heading">WARNINGS</div>
+          <ul id="warnList"><li id="warn0">! Confirm recipient name</li><li id="warn1">! Daily limit $10,000</li><li id="warn2">! 2FA verification required</li></ul>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="label">Run Demo</div>
+      <div class="uc-select" id="ucSelect">
+        <button class="uc-chip sel" data-uc="0"><span class="dot"></span>Retail bank<span class="uc-sub">account transfer</span></button>
+        <button class="uc-chip" data-uc="1"><span class="dot"></span>Settlement break<span class="uc-sub">reconciliation</span></button>
+        <button class="uc-chip" data-uc="2"><span class="dot"></span>Compliance<span class="uc-sub">surveillance</span></button>
+      </div>
+      <div class="demo-hint">Playing continuously. Pick a use case, then use <b>⏮ ▶ ⏭</b> below to step through it.</div>
+    </div>
+  </div>
+
+  <!-- CENTER — Claude, three use cases -->
+  <div class="chat-panel" id="chatPanel" data-theme="claude">
+    <div class="chat-header">
+      <span class="theme-badge" id="themeBadge">RETAIL BANK</span>
+      <span class="mark-wrap" id="markWrap">
+        <svg class="mark-claude" id="markClaude" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <g stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+            <line x1="14.6" y1="12" x2="22" y2="12"></line>
+            <line x1="14.25" y1="13.3" x2="20.66" y2="17"></line>
+            <line x1="13.3" y1="14.25" x2="17" y2="20.66"></line>
+            <line x1="12" y1="14.6" x2="12" y2="22"></line>
+            <line x1="10.7" y1="14.25" x2="7" y2="20.66"></line>
+            <line x1="9.75" y1="13.3" x2="3.34" y2="17"></line>
+            <line x1="9.4" y1="12" x2="2" y2="12"></line>
+            <line x1="9.75" y1="10.7" x2="3.34" y2="7"></line>
+            <line x1="10.7" y1="9.75" x2="7" y2="3.34"></line>
+            <line x1="12" y1="9.4" x2="12" y2="2"></line>
+            <line x1="13.3" y1="9.75" x2="17" y2="3.34"></line>
+            <line x1="14.25" y1="10.7" x2="20.66" y2="7"></line>
+          </g>
+          <circle cx="12" cy="12" r="1.7" fill="currentColor"></circle>
+        </svg>
+      </span>
+      <b id="headerTitle">Claude</b><span class="light" id="headerSub"> Cowork</span>
+    </div>
+
+    <div class="msg-scroll" id="msgScroll"><div class="user-msg-row"><div class="user-msg">Transfer $850 from my checking account ending 4821 to my savings account ending 7392.</div></div></div>
+
+    <div class="reply-shell">
+      <div class="transport">
+        <button class="t-btn" id="tRestart" title="Restart this use case">⟲</button>
+        <button class="t-btn" id="tPrev" title="Previous step">⏮</button>
+        <button class="t-btn play" id="tPlay" title="Play">▶</button>
+        <button class="t-btn" id="tNext" title="Next step">⏭</button>
+        <span class="t-label" id="tLabel">Retail bank · Step 1/6 · Prompt</span>
+        <span class="t-mode" id="tMode">MANUAL</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="col">
+    <div class="panel">
+      <div class="label">Internal Enterprise Systems</div>
+      <div class="auth-label"><span class="lk">🔐</span> Authentication</div>
+      <div class="kv-row"><span id="partyLabel">USER:</span><b id="partyName">Maria Chen</b></div>
+      <div class="kv-row"><span>AGENT ID:</span><b class="agent-id" id="agentId">claude_retail_txn_01</b></div>
+      <div id="connList">
+    <div class="connection-item idle" id="conn0"><div class="left">🏦<div><div class="name">Core Banking API</div><div class="sub">Account &amp; balance lookup</div></div></div><div class="status"><span class="led"></span></div></div>
+    <div class="connection-item idle" id="conn1"><div class="left">💸<div><div class="name">Payment Rails</div><div class="sub">Internal transfer network</div></div></div><div class="status"><span class="led"></span></div></div></div>
+    </div>
+    <div class="panel">
+      <div class="label" style="display:flex;justify-content:space-between;"><span>Stackbase Control Plane</span><span class="session-tag live" id="sessionTag">SESSION: active</span></div>
+      <div class="exec-box" id="execBox">⏳ Awaiting request...</div>
+      <div class="db-info">
+        <div><div id="dbLabel0">from → to</div><div id="dbLabel1">amount</div></div>
+        <div class="col2" id="dbCol2"><div id="transferRoute">—</div><div id="transferAmount">—</div></div>
+      </div>
+      <div class="status-line" id="statusLine"><span class="check">✓</span> <span id="statusText">200 OK · transfer confirmed · receipt sent</span></div>
+    </div>
+    <div class="panel">
+      <div class="label">Agent config</div>
+      <div class="kv-row"><span>AGENT</span><b>Enterprise StackBase Agent</b></div>
+      <div class="kv-row"><span>ACCESS</span><b class="agent-val">Governed · Control Plane</b></div>
+      <div class="kv-row" style="margin-bottom:0;"><span>MODEL</span><b class="agent-val">Claude</b></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const deco = `<svg class="deco-icon" viewBox="0 0 24 24" fill="none"><path d="M16.99 12H17" stroke="currentColor" stroke-width="2" stroke-linecap="square"/><path d="M14.99 10H15" stroke="currentColor" stroke-width="2" stroke-linecap="square"/><path d="M14.99 14H15" stroke="currentColor" stroke-width="2" stroke-linecap="square"/><path d="M12.99 16H13" stroke="currentColor" stroke-width="2" stroke-linecap="square"/><path d="M12.99 8H13" stroke="currentColor" stroke-width="2" stroke-linecap="square"/><path d="M10.99 6H11" stroke="currentColor" stroke-width="2" stroke-linecap="square"/><path d="M10.99 18H11" stroke="currentColor" stroke-width="2" stroke-linecap="square"/><path d="M8.99 20H9" stroke="currentColor" stroke-width="2" stroke-linecap="square"/><path d="M8.99 4H9" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></svg>`;
+
+function stamp(){
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  const timeStr = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+  return { dateStr, timeStr };
+}
+
+function transferReceipt(){
+  const { dateStr, timeStr } = stamp();
+  return `<div class="receipt-card">
+    <div class="rc-head"><div><div class="rc-title">Transfer Receipt</div><div class="rc-ref">TXN-8K4M2P</div></div><div class="rc-date">${dateStr}<br>${timeStr}</div></div>
+    <div class="rc-row"><span>User</span><b>Maria Chen</b></div>
+    <div class="rc-row"><span>From</span><b>Checking ·4821</b></div>
+    <div class="rc-row"><span>To</span><b>Savings ·7392</b></div>
+    <div class="rc-divider"></div>
+    <div class="rc-total"><span>Amount transferred</span><span>$850.00</span></div>
+    <div class="rc-foot"><span>✓</span> Audit trail logged to Stackbase Console</div>
+  </div>`;
+}
+
+function settlementReceipt(){
+  const { dateStr, timeStr } = stamp();
+  return `<div class="receipt-card">
+    <div class="rc-head"><div><div class="rc-title">Break Resolution</div><div class="rc-ref">BRK-4471</div></div><div class="rc-date">${dateStr}<br>${timeStr}</div></div>
+    <div class="rc-row"><span>Trade</span><b>EUR 2.0M bond</b></div>
+    <div class="rc-row"><span>Value date</span><b>Today</b></div>
+    <div class="rc-row"><span>Root cause</span><b>SSI mismatch</b></div>
+    <div class="rc-row"><span>Action</span><b>SSI corrected · reposted</b></div>
+    <div class="rc-divider"></div>
+    <div class="rc-total"><span>Status</span><span>Resolved</span></div>
+    <div class="rc-foot"><span>✓</span> Audit trail logged to Stackbase Console</div>
+  </div>`;
+}
+
+function complianceReceipt(){
+  const { dateStr, timeStr } = stamp();
+  return `<div class="receipt-card">
+    <div class="rc-head"><div><div class="rc-title">Compliance Evidence</div><div class="rc-ref">ALT-2093</div></div><div class="rc-date">${dateStr}<br>${timeStr}</div></div>
+    <div class="rc-row"><span>Desk</span><b>Equities · Cash</b></div>
+    <div class="rc-row"><span>Alert type</span><b>Spoofing (auto-flag)</b></div>
+    <div class="rc-row"><span>Finding</span><b>No breach · within policy</b></div>
+    <div class="rc-row"><span>Evidence</span><b>3 systems · immutable trail</b></div>
+    <div class="rc-divider"></div>
+    <div class="rc-total"><span>Status</span><span>Cleared</span></div>
+    <div class="rc-foot"><span>✓</span> Audit trail logged to Stackbase Console</div>
+  </div>`;
+}
+
+const SCENARIOS = [
+  {
+    key:'retail', name:'Retail bank', badge:'RETAIL BANK',
+    prompt: "Transfer $850 from my checking account ending 4821 to my savings account ending 7392.",
+    answer: "Balance confirmed on Core Banking (checking ·4821, $4,220.50 available). $850.00 transferred to savings ·7392 through Payment Rails. Reference TXN-8K4M2P — receipt sent to Maria Chen. Audit trail logged to the Stackbase Console.",
+    partyLabel:'USER:', user:'Maria Chen', agentId:'claude_retail_txn_01',
+    tools: [
+      { icon:'💳', system:'Core Banking', tool:'CHECK_BALANCE', sub:'Verify funds in the source account', conn:0 },
+      { icon:'👤', system:'Core Banking', tool:'VALIDATE_RECIPIENT', sub:'Confirm the destination account owner', conn:0 },
+      { icon:'↔️', system:'Payment Rails', tool:'EXECUTE_TRANSFER', sub:'Move money between accounts', conn:1 },
+    ],
+    plan: ['Verify source balance', 'Validate recipient', 'Check transfer limit', 'Execute transfer'],
+    warnings: ['Confirm recipient name', 'Daily limit $10,000', '2FA verification required'],
+    approvalWarn: 2,
+    connections: [
+      { emoji:'🏦', name:'Core Banking API', sub:'Account & balance lookup' },
+      { emoji:'💸', name:'Payment Rails', sub:'Internal transfer network' },
+    ],
+    midDone: '✓ Daily limit check passed ($850 of $10,000)',
+    count: { target: 8, text: n => `Verified the transfer on Core Banking — <span class="count" id="mc">${n}</span> account fields checked, with zero direct code changes.` },
+    approval: { exec:'🔐 Core Banking · VERIFY_2FA', title:'Verifying 2FA', sub:"Confirming push approval on Maria Chen's device…", done:'2FA approved · device verified' },
+    dbLabels: ['from → to', 'amount'], route: '·4821 → ·7392', amount: '$850.00 USD',
+    status: '200 OK · transfer confirmed · receipt sent',
+    receipt: transferReceipt,
+  },
+  {
+    key:'settlement', name:'Settlement break', badge:'SETTLEMENT BREAK',
+    prompt: "Investigate and fix settlement break BRK-4471 — the EUR 2.0M bond trade failing settlement today.",
+    answer: "Break BRK-4471 traced on the Settlement System (EUR 2.0M bond, value date today). Recon Engine confirmed an SSI mismatch — corrected to the custodian on file. Repost released through the Payment Engine. Break resolved — audit trail logged to the Stackbase Console.",
+    partyLabel:'USER:', user:'Settlements Ops', agentId:'claude_settle_break_01',
+    tools: [
+      { icon:'🔎', system:'Settlement System', tool:'FIND_TRADE', sub:'Locate the failing settlement', conn:0 },
+      { icon:'📋', system:'Recon Engine', tool:'VERIFY_SSI', sub:'Check standing settlement instructions', conn:1 },
+      { icon:'♻️', system:'Payment Engine', tool:'REPOST', sub:'Re-book and release the payment', conn:2 },
+    ],
+    plan: ['Find the failing trade', 'Verify the SSI', 'Trace the cash', 'Repost & resolve'],
+    warnings: ['Value date is today', 'SSI must match custodian', 'Maker-checker approval required'],
+    approvalWarn: 2,
+    connections: [
+      { emoji:'🏛️', name:'Settlement System', sub:'Failing trades & breaks' },
+      { emoji:'📋', name:'Recon Engine', sub:'SSI & cash reconciliation' },
+      { emoji:'💸', name:'Payment Engine', sub:'Re-book & release payment' },
+    ],
+    midDone: '✓ SSI mismatch confirmed on Recon Engine',
+    count: { target: 6, text: n => `Traced the break across internal systems — <span class="count" id="mc">${n}</span> settlement fields reconciled, with zero direct code changes.` },
+    approval: { exec:'🔒 Control Plane · MAKER-CHECKER', title:'Maker-checker approval', sub:'Awaiting approver sign-off before repost…', done:'Approved · maker-checker cleared' },
+    dbLabels: ['break ref', 'value'], route: 'BRK-4471', amount: 'EUR 2.0M',
+    status: '200 OK · break resolved · audit trail logged',
+    receipt: settlementReceipt,
+  },
+  {
+    key:'compliance', name:'Compliance', badge:'COMPLIANCE',
+    prompt: "Review surveillance alert ALT-2093 on the equities desk — a potential spoofing flag from this morning.",
+    answer: "Alert ALT-2093 reconstructed on the Surveillance System (equities desk, spoofing auto-flag). Orders and market context rebuilt as-of alert time through OMS / Market Data — the cancels fall within policy. Evidence filed to Case Management with an immutable audit trail. Finding: no breach — regulator-ready evidence attached.",
+    partyLabel:'USER:', user:'Compliance Ops', agentId:'claude_trade_surv_01',
+    tools: [
+      { icon:'🚩', system:'Surveillance System', tool:'FIND_ALERTS', sub:'Pull the flagged orders', conn:0 },
+      { icon:'📈', system:'OMS / Market Data', tool:'GET_CONTEXT', sub:'Rebuild order & market context', conn:1 },
+      { icon:'🗂️', system:'Case Management', tool:'FILE_EVIDENCE', sub:'Write up verified evidence', conn:2 },
+    ],
+    plan: ['Pull flagged orders', 'Rebuild market context', 'Confirm the desk', 'File evidence'],
+    warnings: ['Mostly false positives', 'Market data as-of alert time', 'Compliance sign-off required'],
+    approvalWarn: 2,
+    connections: [
+      { emoji:'🚩', name:'Surveillance System', sub:'Alerts & signals' },
+      { emoji:'📈', name:'OMS / Market Data', sub:'Orders & market context' },
+      { emoji:'🗂️', name:'Case Management', sub:'Case notes & audit' },
+    ],
+    midDone: '✓ Market context matched as-of alert time',
+    count: { target: 12, text: n => `Reconstructed the alert across internal systems — <span class="count" id="mc">${n}</span> order & market fields verified, with zero direct code changes.` },
+    approval: { exec:'🔒 Control Plane · COMPLIANCE-SIGNOFF', title:'Compliance sign-off', sub:'Awaiting compliance officer approval…', done:'Approved · compliance signed off' },
+    dbLabels: ['alert ref', 'outcome'], route: 'ALT-2093', amount: 'Cleared · no breach',
+    status: '200 OK · evidence filed · audit trail logged',
+    receipt: complianceReceipt,
+  },
+];
+
+// shared framework step labels (deck-aligned governed access)
+const STEP_LABELS = {
+  authorize: 'Governed access · identity + entitlements',
+  verify: 'Verification · matches real system',
+  execute: 'Stackbase Control Plane · executing',
+};
+const BEATS = 6;
+const BEAT_TITLES = ['Prompt', 'Authorize', 'Verify', 'Approve', 'Execute', 'Resolve'];
+
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+// static refs
+const chatPanel = document.getElementById('chatPanel');
+const msgScroll = document.getElementById('msgScroll');
+const markWrap = document.getElementById('markWrap');
+const themeBadge = document.getElementById('themeBadge');
+const searchText = document.getElementById('searchText');
+const toolList = document.getElementById('toolList');
+const planList = document.getElementById('planList');
+const warnList = document.getElementById('warnList');
+const partyLabelEl = document.getElementById('partyLabel');
+const partyNameEl = document.getElementById('partyName');
+const agentIdEl = document.getElementById('agentId');
+const connList = document.getElementById('connList');
+const execBox = document.getElementById('execBox');
+const sessionTag = document.getElementById('sessionTag');
+const dbCol2 = document.getElementById('dbCol2');
+const dbLabel0 = document.getElementById('dbLabel0');
+const dbLabel1 = document.getElementById('dbLabel1');
+const transferRoute = document.getElementById('transferRoute');
+const transferAmount = document.getElementById('transferAmount');
+const statusLine = document.getElementById('statusLine');
+const statusText = document.getElementById('statusText');
+const tPlay = document.getElementById('tPlay');
+const tPrev = document.getElementById('tPrev');
+const tNext = document.getElementById('tNext');
+const tRestart = document.getElementById('tRestart');
+const tLabel = document.getElementById('tLabel');
+const tMode = document.getElementById('tMode');
+const ucChips = Array.from(document.querySelectorAll('.uc-chip'));
+
+// dynamic refs (rebuilt per use case)
+let toolEls = [], planEls = [], connEls = [], approvalWarnEl = null;
+
+// playback state
+let uc = 0;         // use case index
+let step = -1;      // current beat (-1 = initialized, no beats applied)
+let playing = true;
+let driveToken = 0; // cancels a running auto-drive
+
+function scrollDown(){ msgScroll.scrollTop = msgScroll.scrollHeight; }
+
+function renderScenario(cfg){
+  searchText.textContent = 'search internal tools...';
+  toolList.innerHTML = cfg.tools.map((t,i)=>`
+    <div class="tool-item" id="tool${i}"><div class="icon">${t.icon}</div><div><div class="title"><span class="sys">${t.system} ·</span> ${t.tool}</div><div class="sub">${t.sub}</div></div></div>`).join('');
+  planList.innerHTML = cfg.plan.map((p,i)=>`<li id="plan${i}">${p}</li>`).join('');
+  warnList.innerHTML = cfg.warnings.map((w,i)=>`<li id="warn${i}">! ${w}</li>`).join('');
+
+  partyLabelEl.textContent = cfg.partyLabel;
+  partyNameEl.textContent = cfg.user;
+  agentIdEl.textContent = cfg.agentId;
+  connList.innerHTML = cfg.connections.map((c,i)=>`
+    <div class="connection-item idle" id="conn${i}"><div class="left">${c.emoji}<div><div class="name">${c.name}</div><div class="sub">${c.sub}</div></div></div><div class="status"><span class="led"></span></div></div>`).join('');
+  dbLabel0.textContent = cfg.dbLabels[0];
+  dbLabel1.textContent = cfg.dbLabels[1];
+  themeBadge.textContent = cfg.badge;
+
+  toolEls = cfg.tools.map((_,i)=>document.getElementById('tool'+i));
+  planEls = cfg.plan.map((_,i)=>document.getElementById('plan'+i));
+  connEls = cfg.connections.map((_,i)=>document.getElementById('conn'+i));
+  approvalWarnEl = document.getElementById('warn'+cfg.approvalWarn);
+}
+
+function resetLeftPanel(){
+  toolEls.forEach(t => t && t.classList.remove('active','done'));
+  planEls.forEach(p => p && p.classList.remove('active','done'));
+  if(approvalWarnEl) approvalWarnEl.classList.remove('active');
+}
+function resetRightPanel(){
+  connEls.forEach(c => { if(c) c.className = 'connection-item idle'; });
+  execBox.className = 'exec-box';
+  execBox.textContent = '⏳ Awaiting request...';
+  sessionTag.textContent = 'SESSION: idle';
+  sessionTag.classList.remove('live');
+  dbCol2.classList.remove('reveal');
+  transferRoute.textContent = '—';
+  transferAmount.textContent = '—';
+  statusLine.classList.remove('show');
+}
+function highlightLeft({ tool, plan, markDone }){
+  if(markDone){
+    if(markDone.tool !== undefined){ toolEls[markDone.tool].classList.remove('active'); toolEls[markDone.tool].classList.add('done'); }
+    if(markDone.plan !== undefined){ planEls[markDone.plan].classList.remove('active'); planEls[markDone.plan].classList.add('done'); }
+  }
+  if(tool !== undefined){ toolEls[tool].classList.add('active'); }
+  if(plan !== undefined){ planEls[plan].classList.add('active'); }
+}
+function lightConn(i){
+  const el = connEls[i];
+  if(!el) return;
+  el.classList.remove('idle');
+  el.classList.add('busy','active');
+}
+
+async function typeInto(el, text, speed){
+  el.innerHTML = '';
+  const span = document.createElement('span');
+  const cursor = document.createElement('span');
+  cursor.className = 'type-cursor';
+  el.appendChild(span); el.appendChild(cursor);
+  for(let i=0;i<text.length;i++){ span.textContent += text[i]; await delay(speed + Math.random()*24); }
+}
+function addNode(html){
+  const wrap = document.createElement('div');
+  wrap.innerHTML = html;
+  const node = wrap.firstElementChild;
+  msgScroll.appendChild(node);
+  scrollDown();
+  return node;
+}
+function execText(cfg, i){ const t = cfg.tools[i]; return `${t.icon} ${t.system} · ${t.tool}`; }
+function addStep(labelTxt, withProgress){
+  const prog = withProgress ? `<div class="progress-track"><div class="progress-fill"></div></div>` : '';
+  return addNode(`<div class="step"><div class="sys-label shimmer"><span class="txt">${labelTxt}</span>${deco}</div>${prog}</div>`);
+}
+function settle(node){ node.querySelector('.sys-label').classList.remove('shimmer'); node.classList.add('settled'); }
+
+function initUseCase(cfg){
+  renderScenario(cfg);
+  resetLeftPanel();
+  resetRightPanel();
+  msgScroll.innerHTML = '';
+  markWrap.classList.remove('thinking');
+}
+
+// Apply a single beat. `animate` = rich async version; otherwise instant end-state.
+async function applyBeat(cfg, k, animate){
+  switch(k){
+    case 0: { // Prompt
+      markWrap.classList.remove('thinking');
+      addNode(`<div class="user-msg-row"><div class="user-msg">${cfg.prompt}</div></div>`);
+      sessionTag.textContent = 'SESSION: active';
+      sessionTag.classList.add('live');
+      if(animate){
+        markWrap.classList.add('thinking');
+        const th = addNode(`<div class="thinking-row"><span></span><span></span><span></span></div>`);
+        await delay(1300);
+        th.remove();
+        markWrap.classList.remove('thinking');
+      }
+      break;
+    }
+    case 1: { // Authorize (tool 0)
+      markWrap.classList.add('thinking');
+      highlightLeft({ tool:0, plan:0 });
+      lightConn(cfg.tools[0].conn);
+      execBox.textContent = execText(cfg, 0);
+      execBox.className = 'exec-box running';
+      const s = addStep(STEP_LABELS.authorize);
+      if(animate) await delay(1300);
+      settle(s);
+      break;
+    }
+    case 2: { // Verify (tool 1) + summary count
+      markWrap.classList.add('thinking');
+      highlightLeft({ markDone:{ tool:0, plan:0 }, tool:1, plan:1 });
+      const s = addStep(STEP_LABELS.verify, true);
+      const pf = s.querySelector('.progress-fill');
+      execBox.textContent = execText(cfg, 1) + ' · sandbox';
+      execBox.className = 'exec-box running';
+      lightConn(cfg.tools[1].conn);
+      if(animate){ await delay(90); pf.style.width = '100%'; await delay(1700); }
+      else { pf.style.transition = 'none'; pf.style.width = '100%'; }
+      settle(s);
+      highlightLeft({ markDone:{ tool:1, plan:1 }, plan:2 });
+      execBox.className = 'exec-box';
+      execBox.textContent = cfg.midDone;
+      addNode(`<div class="sys-text">${cfg.count.text(0)}</div>`);
+      const mc = document.getElementById('mc');
+      if(animate){
+        await new Promise(res=>{
+          const start = performance.now(), dur = 1000, target = cfg.count.target;
+          function tick(now){
+            const p = Math.min(1,(now-start)/dur);
+            mc.textContent = Math.floor((1-Math.pow(1-p,3))*target).toLocaleString();
+            if(p<1) requestAnimationFrame(tick); else { mc.textContent = target.toLocaleString(); res(); }
+          }
+          requestAnimationFrame(tick);
+        });
+      } else { mc.textContent = cfg.count.target.toLocaleString(); }
+      break;
+    }
+    case 3: { // Approve (governed approval / 2FA)
+      markWrap.classList.add('thinking');
+      if(approvalWarnEl) approvalWarnEl.classList.add('active');
+      execBox.className = 'exec-box running';
+      execBox.textContent = cfg.approval.exec;
+      const node = addNode(`<div class="twofa-step">
+        <span class="lock">🔐</span>
+        <div class="twofa-body">
+          <div class="twofa-title">${cfg.approval.title}</div>
+          <div class="twofa-sub">${cfg.approval.sub}</div>
+        </div>
+        <div class="twofa-dots"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      </div>`);
+      if(animate){ await delay(2300); node.querySelector('.twofa-sub').textContent = cfg.approval.done; await delay(600); }
+      else { node.querySelector('.twofa-sub').textContent = cfg.approval.done; }
+      node.style.transition = 'opacity .4s ease';
+      node.style.opacity = '.4';
+      if(approvalWarnEl) approvalWarnEl.classList.remove('active');
+      break;
+    }
+    case 4: { // Execute (tool 2)
+      markWrap.classList.add('thinking');
+      highlightLeft({ markDone:{ plan:2 }, tool:2, plan:3 });
+      lightConn(cfg.tools[2].conn);
+      execBox.className = 'exec-box running';
+      execBox.textContent = execText(cfg, 2);
+      const s = addStep(STEP_LABELS.execute);
+      if(animate) await delay(1300);
+      settle(s);
+      transferRoute.textContent = cfg.route;
+      transferAmount.textContent = cfg.amount;
+      dbCol2.classList.add('reveal');
+      execBox.className = 'exec-box done';
+      break;
+    }
+    case 5: { // Resolve (receipt + answer)
+      addNode(cfg.receipt());
+      scrollDown();
+      if(animate) await delay(500);
+      markWrap.classList.remove('thinking');
+      const ans = addNode(`<div class="sys-text strong" style="opacity:1;"></div>`);
+      if(animate) await typeInto(ans, cfg.answer, 22);
+      else ans.textContent = cfg.answer;
+      scrollDown();
+      highlightLeft({ markDone:{ tool:2, plan:3 } });
+      statusText.textContent = cfg.status;
+      statusLine.classList.add('show');
+      break;
+    }
+  }
+  scrollDown();
+}
+
+function selectChip(idx){ ucChips.forEach((c,i)=> c.classList.toggle('sel', i===idx)); }
+function updatePlayBtn(){ tPlay.textContent = playing ? '⏸' : '▶'; tPlay.title = playing ? 'Pause' : 'Play'; }
+function updateTransport(){
+  const cfg = SCENARIOS[uc];
+  const s = Math.max(step, 0);
+  tLabel.textContent = `${cfg.name} · Step ${s+1}/${BEATS} · ${BEAT_TITLES[s]}`;
+  tMode.textContent = playing ? 'AUTO' : 'MANUAL';
+  updatePlayBtn();
+}
+
+// instant scrub to a specific (use case, step)
+async function renderTo(newUc, newStep){
+  uc = newUc; step = newStep;
+  const cfg = SCENARIOS[uc];
+  selectChip(uc);
+  initUseCase(cfg);
+  for(let k=0;k<=step;k++){ await applyBeat(cfg, k, false); }
+  updateTransport();
+}
+
+async function slideSwitch(newUc){
+  chatPanel.classList.remove('theme-switch-in');
+  chatPanel.classList.add('theme-switch-out');
+  await delay(430);
+  uc = newUc; step = -1;
+  initUseCase(SCENARIOS[uc]);
+  selectChip(uc);
+  chatPanel.classList.remove('theme-switch-out');
+  chatPanel.classList.add('theme-switch-in');
+  await delay(430);
+  chatPanel.classList.remove('theme-switch-in');
+}
+
+async function drive(){
+  const my = ++driveToken;
+  playing = true; updateTransport();
+  while(my === driveToken && playing){
+    if(step >= BEATS-1){
+      await delay(2600); if(my !== driveToken || !playing) return;
+      await slideSwitch((uc+1) % SCENARIOS.length);
+      if(my !== driveToken || !playing) return;
+    }
+    step++;
+    await applyBeat(SCENARIOS[uc], step, true);
+    updateTransport();
+    if(my !== driveToken || !playing) return;
+    await delay(750);
+  }
+}
+
+function pause(){ playing = false; driveToken++; updateTransport(); }
+
+function nextPos(){ return step < BEATS-1 ? [uc, step+1] : [(uc+1) % SCENARIOS.length, 0]; }
+function prevPos(){ return step > 0 ? [uc, step-1] : [(uc-1+SCENARIOS.length) % SCENARIOS.length, BEATS-1]; }
+
+tPlay.addEventListener('click', ()=>{ if(playing) pause(); else drive(); });
+tNext.addEventListener('click', ()=>{ pause(); const [u,s]=nextPos(); renderTo(u,s); });
+tPrev.addEventListener('click', ()=>{ pause(); const [u,s]=prevPos(); renderTo(u,s); });
+tRestart.addEventListener('click', ()=>{ pause(); renderTo(uc, 0); });
+ucChips.forEach(chip => chip.addEventListener('click', ()=>{
+  pause();
+  renderTo(parseInt(chip.dataset.uc,10), 0);
+}));
+
+// keyboard: ← prev, → next, space play/pause
+window.addEventListener('keydown', e=>{
+  if(e.key === 'ArrowRight'){ e.preventDefault(); tNext.click(); }
+  else if(e.key === 'ArrowLeft'){ e.preventDefault(); tPrev.click(); }
+  else if(e.key === ' '){ e.preventDefault(); tPlay.click(); }
+});
+
+// boot — continuous auto-play from the first use case
+uc = 0; step = -1;
+initUseCase(SCENARIOS[0]);
+selectChip(0);
+drive();
+</script>
+
+
+</body></html>
